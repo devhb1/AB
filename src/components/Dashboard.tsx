@@ -209,10 +209,21 @@ export function Dashboard() {
         try {
             const config =
                 provider === "slack"
-                    ? { channelIds: slackChannels.split(",").map((c) => c.trim()).filter(Boolean) }
+                    ? {
+                        channelIds: slackChannels
+                            .split(",")
+                            .map((c) => c.trim())
+                            .filter(Boolean)
+                            .length > 0
+                            ? slackChannels.split(",").map((c) => c.trim()).filter(Boolean)
+                            : ["demo-general"],
+                    }
                     : provider === "github"
-                        ? { owner: githubOwner, repo: githubRepo }
-                        : { query: gmailQuery };
+                        ? {
+                            owner: githubOwner.trim() || "demo-owner",
+                            repo: githubRepo.trim() || "demo-repo",
+                        }
+                        : { query: gmailQuery.trim() || "newer_than:30d" };
 
             const response = await fetch(`/api/workspaces/${encodeURIComponent(workspaceId)}/connections`, {
                 method: "POST",
@@ -348,11 +359,12 @@ export function Dashboard() {
                                     />
                                     <button
                                         onClick={() => void connectProvider("slack")}
-                                        disabled={loadingSlack || !slackChannels}
+                                        disabled={loadingSlack}
                                         className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2 font-semibold text-[var(--foreground)] hover:border-[var(--foreground)] disabled:opacity-60"
                                     >
                                         {loadingSlack ? "Connecting..." : "Connect Slack"}
                                     </button>
+                                    <p className="mt-2 text-xs text-[var(--muted)]">Uses demo defaults if you leave this empty.</p>
                                 </div>
 
                                 {/* GitHub */}
@@ -377,11 +389,12 @@ export function Dashboard() {
                                     />
                                     <button
                                         onClick={() => void connectProvider("github")}
-                                        disabled={loadingGithub || !githubOwner || !githubRepo}
+                                        disabled={loadingGithub}
                                         className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2 font-semibold text-[var(--foreground)] hover:border-[var(--foreground)] disabled:opacity-60"
                                     >
                                         {loadingGithub ? "Connecting..." : "Connect GitHub"}
                                     </button>
+                                    <p className="mt-2 text-xs text-[var(--muted)]">Uses demo owner/repo if you leave these empty.</p>
                                 </div>
 
                                 {/* Gmail */}
@@ -399,11 +412,12 @@ export function Dashboard() {
                                     />
                                     <button
                                         onClick={() => void connectProvider("gmail")}
-                                        disabled={loadingGmail || !gmailQuery}
+                                        disabled={loadingGmail}
                                         className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2 font-semibold text-[var(--foreground)] hover:border-[var(--foreground)] disabled:opacity-60"
                                     >
                                         {loadingGmail ? "Connecting..." : "Connect Gmail"}
                                     </button>
+                                    <p className="mt-2 text-xs text-[var(--muted)]">Defaults to a 30 day query if you change nothing.</p>
                                 </div>
                             </div>
                         </div>
