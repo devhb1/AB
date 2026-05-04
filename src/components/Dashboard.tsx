@@ -375,77 +375,46 @@ export function Dashboard() {
                                 {/* Slack */}
                                 <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm ring-1 ring-[var(--surface)]">
                                     <h3 className="mb-2 text-lg font-semibold text-[var(--foreground)]">Slack</h3>
-                                    <p className="mb-4 text-sm text-[var(--muted)]">
+                                    <p className="mb-6 text-sm text-[var(--muted)]">
                                         Sync your Slack channel history and discussions.
                                     </p>
-                                    <input
-                                        type="text"
-                                        placeholder="Channel IDs (comma-separated)"
-                                        value={slackChannels}
-                                        onChange={(e) => setSlackChannels(e.target.value)}
-                                        className="mb-4 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)]"
-                                    />
                                     <button
                                         onClick={() => openConnectionWindow("slack")}
                                         disabled={loadingSlack}
-                                        className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2 font-semibold text-[var(--foreground)] hover:border-[var(--foreground)] disabled:opacity-60"
+                                        className="w-full rounded-lg border border-[var(--primary)] bg-[var(--primary)] px-4 py-3 font-semibold text-[var(--primary-foreground)] hover:shadow-lg disabled:opacity-60"
                                     >
-                                        {loadingSlack ? "Opening..." : "Open connection window"}
+                                        {loadingSlack ? "Opening..." : "Connect Slack"}
                                     </button>
-                                    <p className="mt-2 text-xs text-[var(--muted)]">Uses demo defaults if you leave this empty.</p>
                                 </div>
 
                                 {/* GitHub */}
                                 <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm ring-1 ring-[var(--surface)]">
                                     <h3 className="mb-2 text-lg font-semibold text-[var(--foreground)]">GitHub</h3>
-                                    <p className="mb-4 text-sm text-[var(--muted)]">
+                                    <p className="mb-6 text-sm text-[var(--muted)]">
                                         Sync commits, PRs, and issues from your repos.
                                     </p>
-                                    <input
-                                        type="text"
-                                        placeholder="Owner"
-                                        value={githubOwner}
-                                        onChange={(e) => setGithubOwner(e.target.value)}
-                                        className="mb-2 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)]"
-                                    />
-                                    <input
-                                        type="text"
-                                        placeholder="Repository"
-                                        value={githubRepo}
-                                        onChange={(e) => setGithubRepo(e.target.value)}
-                                        className="mb-4 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)]"
-                                    />
                                     <button
                                         onClick={() => openConnectionWindow("github")}
                                         disabled={loadingGithub}
-                                        className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2 font-semibold text-[var(--foreground)] hover:border-[var(--foreground)] disabled:opacity-60"
+                                        className="w-full rounded-lg border border-[var(--primary)] bg-[var(--primary)] px-4 py-3 font-semibold text-[var(--primary-foreground)] hover:shadow-lg disabled:opacity-60"
                                     >
-                                        {loadingGithub ? "Opening..." : "Open connection window"}
+                                        {loadingGithub ? "Opening..." : "Connect GitHub"}
                                     </button>
-                                    <p className="mt-2 text-xs text-[var(--muted)]">Uses demo owner/repo if you leave these empty.</p>
                                 </div>
 
                                 {/* Gmail */}
                                 <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm ring-1 ring-[var(--surface)]">
                                     <h3 className="mb-2 text-lg font-semibold text-[var(--foreground)]">Gmail</h3>
-                                    <p className="mb-4 text-sm text-[var(--muted)]">
+                                    <p className="mb-6 text-sm text-[var(--muted)]">
                                         Sync important email threads and conversations.
                                     </p>
-                                    <input
-                                        type="text"
-                                        placeholder="Search query"
-                                        value={gmailQuery}
-                                        onChange={(e) => setGmailQuery(e.target.value)}
-                                        className="mb-4 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)]"
-                                    />
                                     <button
                                         onClick={() => openConnectionWindow("gmail")}
                                         disabled={loadingGmail}
-                                        className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2 font-semibold text-[var(--foreground)] hover:border-[var(--foreground)] disabled:opacity-60"
+                                        className="w-full rounded-lg border border-[var(--primary)] bg-[var(--primary)] px-4 py-3 font-semibold text-[var(--primary-foreground)] hover:shadow-lg disabled:opacity-60"
                                     >
-                                        {loadingGmail ? "Opening..." : "Open connection window"}
+                                        {loadingGmail ? "Opening..." : "Connect Gmail"}
                                     </button>
-                                    <p className="mt-2 text-xs text-[var(--muted)]">Defaults to a 30 day query if you change nothing.</p>
                                 </div>
                             </div>
                         </div>
