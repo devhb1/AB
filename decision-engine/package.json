@@ -12,11 +12,9 @@
     "db:local:down": "docker compose down"
   },
   "dependencies": {
-    "@next/swc-darwin-arm64": "^16.2.4",
     "@slack/web-api": "^7.15.1",
     "googleapis": "^171.4.0",
     "lightningcss": "^1.32.0",
-    "lightningcss-darwin-arm64": "^1.32.0",
     "next": "16.2.4",
     "octokit": "^5.0.5",
     "openai": "^6.35.0",

@@ -1,14 +1,16 @@
 {
     "name": "y-comb-workspace",
     "private": true,
+    "workspaces": [
+        "decision-engine"
+    ],
     "scripts": {
-        "dev": "npm --prefix decision-engine run dev",
-        "build": "npm --prefix decision-engine run build",
-        "start": "npm --prefix decision-engine run start",
-        "lint": "npm --prefix decision-engine run lint",
-        "typecheck": "npm --prefix decision-engine run typecheck",
-        "vercel-build": "npm --prefix decision-engine run build",
-        "postinstall": "npm install --prefix decision-engine"
+        "dev": "npm --workspace decision-engine run dev",
+        "build": "npm --workspace decision-engine run build",
+        "start": "npm --workspace decision-engine run start",
+        "lint": "npm --workspace decision-engine run lint",
+        "typecheck": "npm --workspace decision-engine run typecheck",
+        "vercel-build": "npm --workspace decision-engine run build"
     },
     "dependencies": {
         "next": "16.2.4",
