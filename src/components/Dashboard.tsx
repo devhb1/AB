@@ -181,15 +181,15 @@ export function Dashboard() {
     };
 
     return (
-        <main className="min-h-screen bg-slate-50">
+        <main className="min-h-screen bg-[#f6f6f5]">
             {/* Header */}
-            <header className="sticky top-0 z-50 border-b border-slate-200 bg-slate-50/90 backdrop-blur-sm">
+            <header className="sticky top-0 z-50 border-b border-slate-200 bg-[#f6f6f5]/95 backdrop-blur-sm">
                 <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-black flex items-center justify-center shadow-sm">
                             <span className="text-white font-bold text-sm">26</span>
                         </div>
-                        <span className="text-xl font-bold text-black">AHB26</span>
+                        <span className="text-2xl font-extrabold text-black">AHB26</span>
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="text-sm text-slate-600">
@@ -211,26 +211,29 @@ export function Dashboard() {
 
                 {/* Workspace Section */}
                 {!workspaceId ? (
-                    <div className="max-w-lg mx-auto">
-                        <div className="rounded-2xl border border-slate-200 bg-white p-10 shadow-lg ring-1 ring-slate-100">
-                            <h2 className="text-2xl font-bold text-black mb-2">Create Your Workspace</h2>
-                            <p className="text-slate-600 mb-6">
-                                Set up a workspace to start syncing your team context from Slack, GitHub, and Gmail.
-                            </p>
-                            <input
-                                type="text"
-                                placeholder="Workspace name"
-                                value={workspaceName}
-                                onChange={(e) => setWorkspaceName(e.target.value)}
-                                className="w-full px-4 py-3 rounded-lg bg-slate-50 text-black placeholder-slate-400 border border-slate-200 mb-4"
-                            />
-                            <button
-                                onClick={() => void createWorkspace()}
-                                disabled={loadingWorkspace}
-                                className="w-full px-6 py-3 rounded-lg bg-black text-white font-semibold hover:shadow-lg disabled:opacity-60"
-                            >
-                                {loadingWorkspace ? "Creating..." : "Create Workspace"}
-                            </button>
+                    <div className="max-w-3xl mx-auto">
+                        <div className="relative rounded-3xl">
+                            <div className="absolute -inset-6 -z-10 rounded-3xl bg-white/60 blur-2xl"></div>
+                            <div className="rounded-3xl border border-slate-200 bg-white p-12 shadow-[0_60px_140px_rgba(2,6,23,0.14)]">
+                                <h2 className="text-2xl font-bold text-black mb-2">Create Your Workspace</h2>
+                                <p className="text-slate-600 mb-6">
+                                    Set up a workspace to start syncing your team context from Slack, GitHub, and Gmail.
+                                </p>
+                                <input
+                                    type="text"
+                                    placeholder="Workspace name"
+                                    value={workspaceName}
+                                    onChange={(e) => setWorkspaceName(e.target.value)}
+                                    className="w-full px-4 py-3 rounded-lg bg-slate-50 text-black placeholder-slate-400 border border-slate-200 mb-4"
+                                />
+                                <button
+                                    onClick={() => void createWorkspace()}
+                                    disabled={loadingWorkspace}
+                                    className="w-full px-6 py-3 rounded-lg bg-black text-white font-semibold hover:shadow-lg disabled:opacity-60"
+                                >
+                                    {loadingWorkspace ? "Creating..." : "Create Workspace"}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 ) : (

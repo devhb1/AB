@@ -7,7 +7,7 @@ export function LandingPage() {
     const { isSignedIn } = useUser();
 
     return (
-        <main className="min-h-screen bg-slate-50 text-slate-900">
+        <main className="min-h-screen bg-[#f6f6f5] text-slate-900">
             <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-[#fbfaf7]/90 backdrop-blur">
                 <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -79,29 +79,32 @@ export function LandingPage() {
                         </div>
                     </div>
 
-                    <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-lg ring-1 ring-slate-100">
-                        <div className="mb-6 flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Dashboard preview</p>
-                                <h3 className="mt-2 text-2xl font-semibold text-slate-950">Create, connect, sync</h3>
+                    <div className="relative rounded-[2rem]">
+                        <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-white/60 blur-2xl"></div>
+                        <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-2xl ring-1 ring-white">
+                            <div className="mb-6 flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Dashboard preview</p>
+                                    <h3 className="mt-2 text-2xl font-semibold text-slate-950">Create, connect, sync</h3>
+                                </div>
+                                <div className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                                    YC theme
+                                </div>
                             </div>
-                            <div className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-                                YC theme
-                            </div>
-                        </div>
 
-                        <div className="space-y-4">
-                            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                                <p className="text-sm font-semibold text-slate-900">1. Create a workspace</p>
-                                <p className="mt-1 text-sm text-slate-600">Set up your team space and connect your account.</p>
-                            </div>
-                            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                                <p className="text-sm font-semibold text-slate-900">2. Connect Slack, GitHub, Gmail</p>
-                                <p className="mt-1 text-sm text-slate-600">Bring in the sources your team already uses.</p>
-                            </div>
-                            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                                <p className="text-sm font-semibold text-slate-900">3. Sync and query</p>
-                                <p className="mt-1 text-sm text-slate-600">Start syncing and surface context instantly.</p>
+                            <div className="space-y-4">
+                                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-md">
+                                    <p className="text-sm font-semibold text-slate-900">1. Create a workspace</p>
+                                    <p className="mt-1 text-sm text-slate-600">Set up your team space and connect your account.</p>
+                                </div>
+                                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-md">
+                                    <p className="text-sm font-semibold text-slate-900">2. Connect Slack, GitHub, Gmail</p>
+                                    <p className="mt-1 text-sm text-slate-600">Bring in the sources your team already uses.</p>
+                                </div>
+                                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-md">
+                                    <p className="text-sm font-semibold text-slate-900">3. Sync and query</p>
+                                    <p className="mt-1 text-sm text-slate-600">Start syncing and surface context instantly.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
