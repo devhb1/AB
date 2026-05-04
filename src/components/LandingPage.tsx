@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useUser, SignInButton, SignUpButton } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 
 const featureCards = [
     {
@@ -61,16 +61,18 @@ export function LandingPage() {
 
                     {!isSignedIn && (
                         <div className="mt-8 flex flex-wrap gap-3">
-                            <SignUpButton mode="modal" fallbackRedirectUrl="/">
-                                <button className="rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500">
-                                    Sign up
-                                </button>
-                            </SignUpButton>
-                            <SignInButton mode="modal" fallbackRedirectUrl="/">
-                                <button className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-                                    Log in
-                                </button>
-                            </SignInButton>
+                            <Link
+                                href="/sign-up"
+                                className="rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
+                            >
+                                Sign up
+                            </Link>
+                            <Link
+                                href="/sign-in"
+                                className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                            >
+                                Log in
+                            </Link>
                         </div>
                     )}
 
