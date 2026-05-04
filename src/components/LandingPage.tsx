@@ -1,6 +1,7 @@
 "use client";
 
-import { SignInButton, SignUpButton } from "@clerk/nextjs";
+import Link from "next/link";
+import { useUser, SignInButton, SignUpButton } from "@clerk/nextjs";
 
 const featureCards = [
     {
@@ -42,6 +43,8 @@ function TimelineNode({
 }
 
 export function LandingPage() {
+    const { isSignedIn } = useUser();
+
     return (
         <section className="mb-8 overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-2xl shadow-slate-300/40">
             <div className="grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
@@ -56,18 +59,37 @@ export function LandingPage() {
                         decision graph.
                     </p>
 
-                    <div className="mt-8 flex flex-wrap gap-3">
-                        <SignUpButton mode="modal" fallbackRedirectUrl="/">
-                            <button className="rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500">
-                                Get started
-                            </button>
-                        </SignUpButton>
-                        <SignInButton mode="modal" fallbackRedirectUrl="/">
-                            <button className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-                                Log in
-                            </button>
-                        </SignInButton>
-                    </div>
+                    {!isSignedIn && (
+                        <div className="mt-8 flex flex-wrap gap-3">
+                            <SignUpButton mode="modal" fallbackRedirectUrl="/">
+                                <button className="rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500">
+                                    Sign up
+                                </button>
+                            </SignUpButton>
+                            <SignInButton mode="modal" fallbackRedirectUrl="/">
+                                <button className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                                    Log in
+                                </button>
+                            </SignInButton>
+                        </div>
+                    )}
+
+                    {isSignedIn && (
+                        <div className="mt-8 flex flex-wrap gap-3">
+                            <Link
+                                href="/workspaces"
+                                className="rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
+                            >
+                                Create workspace
+                            </Link>
+                            <Link
+                                href="/"
+                                className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                            >
+                                Open dashboard
+                            </Link>
+                        </div>
+                    )}
 
                     <div className="mt-8 flex flex-wrap gap-3">
                         <span className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white">
@@ -96,6 +118,30 @@ export function LandingPage() {
                             We solve knowledge debt: the loss of context when teams move fast and nobody can
                             remember why the last deployment failed.
                         </p>
+                    </div>
+
+                    <div className="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-6">
+                        <p className="text-sm uppercase tracking-[0.3em] text-slate-500">About us</p>
+                        <h2 className="mt-3 text-2xl font-semibold text-slate-900">Built by operators for fast teams</h2>
+                        <p className="mt-3 text-sm leading-7 text-slate-700">
+                            We started this product after repeatedly seeing teams lose critical decision context during
+                            handovers, incidents, and scaling. Our mission is simple: preserve the why behind every
+                            important decision so new and existing team members can move faster with confidence.
+                        </p>
+                        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                            <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                                <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Mission</p>
+                                <p className="mt-2 text-sm font-medium text-slate-900">Keep company memory searchable and explainable.</p>
+                            </div>
+                            <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                                <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Approach</p>
+                                <p className="mt-2 text-sm font-medium text-slate-900">Connect sources, build timelines, generate decision memos.</p>
+                            </div>
+                            <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                                <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Outcome</p>
+                                <p className="mt-2 text-sm font-medium text-slate-900">Faster onboarding, cleaner execution, fewer repeated mistakes.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
