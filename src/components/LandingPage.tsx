@@ -1,3 +1,5 @@
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
+
 const featureCards = [
     {
         title: "Autonomous ingestion",
@@ -51,6 +53,19 @@ export function LandingPage() {
                         Decision Engine turns Slack, GitHub, Gmail, and support threads into a living
                         decision graph.
                     </p>
+
+                    <div className="mt-8 flex flex-wrap gap-3">
+                        <SignUpButton mode="modal" fallbackRedirectUrl="/">
+                            <button className="rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500">
+                                Get started
+                            </button>
+                        </SignUpButton>
+                        <SignInButton mode="modal" fallbackRedirectUrl="/">
+                            <button className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                                Log in
+                            </button>
+                        </SignInButton>
+                    </div>
 
                     <div className="mt-8 flex flex-wrap gap-3">
                         <span className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white">

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build --webpack",
+    "build": "NODE_OPTIONS=--max-old-space-size=4096 next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
@@ -12,6 +12,7 @@
     "db:local:down": "docker compose down"
   },
   "dependencies": {
+    "@clerk/nextjs": "^7.3.0",
     "@slack/web-api": "^7.15.1",
     "googleapis": "^171.4.0",
     "lightningcss": "^1.32.0",

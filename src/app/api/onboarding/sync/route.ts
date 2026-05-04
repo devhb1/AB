@@ -4,12 +4,13 @@ import { ingestGithubEvents } from "@/lib/connectors/github";
 import { ingestGmailEvents } from "@/lib/connectors/gmail";
 import { ingestRecords } from "@/lib/ingestion";
 import { buildCompanyHealthReport } from "@/lib/relationship-scraper";
-import { getWorkspaceConnectionMap } from "@/lib/db";
+import { getWorkspaceConnectionMap, getWorkspaceOrDemoDefault } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json().catch(() => ({}));
-        const userId = request.headers.get("x-user-id") ?? body.userId ?? body.workspaceId ?? "demo-user";
+        const rawWorkspaceId = request.headers.get("x-workspace-id") ?? body.workspaceId ?? body.userId ?? request.headers.get("x-user-id") ?? "demo-user";
+        const userId = await getWorkspaceOrDemoDefault(rawWorkspaceId);
         const connections = await getWorkspaceConnectionMap(userId);
         const slackConnection = connections.slack ?? {};
         const githubConnection = connections.github ?? {};

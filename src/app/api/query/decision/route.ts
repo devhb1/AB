@@ -1,23 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { embedText, synthesizeDecisionTimeline } from "@/lib/embeddings";
-import { ensureSchema, findSimilarChunks } from "@/lib/db";
+import { ensureSchema, findSimilarChunks, getWorkspaceOrDemoDefault } from "@/lib/db";
 
 const querySchema = z.object({
     question: z.string().min(5),
     topK: z.number().int().positive().max(20).optional(),
     userId: z.string().min(1).optional(),
+    workspaceId: z.string().min(1).optional(),
 });
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const input = querySchema.parse(body);
-        const userId = input.userId ?? request.headers.get("x-user-id") ?? "demo-user";
+        const workspaceId = input.workspaceId ?? input.userId ?? request.headers.get("x-workspace-id") ?? request.headers.get("x-user-id") ?? "demo-user";
+        const validWorkspaceId = await getWorkspaceOrDemoDefault(workspaceId);
 
         await ensureSchema();
         const embedding = await embedText(input.question);
-        const chunks = await findSimilarChunks(embedding, input.topK ?? 8, userId);
+        const chunks = await findSimilarChunks(embedding, input.topK ?? 8, validWorkspaceId);
 
         const contextBlocks = chunks.map((chunk) => {
             return [
@@ -35,7 +37,7 @@ export async function POST(request: NextRequest) {
             contextBlocks,
         });
 
-        return NextResponse.json({ ok: true, userId, memo, evidence: chunks });
+        return NextResponse.json({ ok: true, userId: validWorkspaceId, memo, evidence: chunks });
     } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";
         return NextResponse.json({ ok: false, error: message }, { status: 400 });

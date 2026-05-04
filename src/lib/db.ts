@@ -18,6 +18,19 @@ export function getDbPool(): Pool {
     return pool;
 }
 
+// Helper to validate workspace exists and return it
+export async function getWorkspaceOrDemoDefault(workspaceId?: string): Promise<string> {
+    const id = workspaceId ?? "demo-user";
+    if (id === "demo-user") {
+        return id;
+    }
+
+    // For real workspaces, verify they exist in the DB
+    const db = getDbPool();
+    const result = await db.query("SELECT id FROM workspaces WHERE id = $1 LIMIT 1", [id]);
+    return result.rows.length > 0 ? id : "demo-user";
+}
+
 export async function ensureSchema(): Promise<void> {
     const db = getDbPool();
     await db.query("CREATE EXTENSION IF NOT EXISTS vector");
@@ -55,6 +68,7 @@ export async function ensureSchema(): Promise<void> {
     CREATE TABLE IF NOT EXISTS event_chunks (
       id BIGSERIAL PRIMARY KEY,
     user_id TEXT NOT NULL DEFAULT 'demo-user',
+    workspace_id TEXT DEFAULT 'demo-user',
       source_type TEXT NOT NULL,
       external_id TEXT NOT NULL,
       title TEXT NOT NULL,
@@ -71,18 +85,27 @@ export async function ensureSchema(): Promise<void> {
 
     await db.query("ALTER TABLE event_chunks ADD COLUMN IF NOT EXISTS user_id TEXT NOT NULL DEFAULT 'demo-user'");
     await db.query("ALTER TABLE event_chunks ALTER COLUMN user_id SET DEFAULT 'demo-user'");
+    await db.query("ALTER TABLE event_chunks ADD COLUMN IF NOT EXISTS workspace_id TEXT DEFAULT 'demo-user'");
+    await db.query("ALTER TABLE event_chunks ALTER COLUMN workspace_id SET DEFAULT 'demo-user'");
     await db.query("ALTER TABLE event_chunks DROP CONSTRAINT IF EXISTS event_chunks_source_type_external_id_key");
     await db.query(
         "CREATE UNIQUE INDEX IF NOT EXISTS event_chunks_user_source_external_uidx ON event_chunks (user_id, source_type, external_id)",
     );
     await db.query(
+        "CREATE UNIQUE INDEX IF NOT EXISTS event_chunks_workspace_source_external_uidx ON event_chunks (workspace_id, source_type, external_id)",
+    );
+    await db.query(
         "CREATE INDEX IF NOT EXISTS event_chunks_user_occurred_at_idx ON event_chunks (user_id, occurred_at DESC)",
+    );
+    await db.query(
+        "CREATE INDEX IF NOT EXISTS event_chunks_workspace_occurred_at_idx ON event_chunks (workspace_id, occurred_at DESC)",
     );
 
     await db.query(`
         CREATE TABLE IF NOT EXISTS cross_links (
             id BIGSERIAL PRIMARY KEY,
             user_id TEXT NOT NULL DEFAULT 'demo-user',
+            workspace_id TEXT DEFAULT 'demo-user',
             source_chunk_id BIGINT NOT NULL REFERENCES event_chunks(id) ON DELETE CASCADE,
             target_chunk_id BIGINT NOT NULL REFERENCES event_chunks(id) ON DELETE CASCADE,
             link_type TEXT NOT NULL,
@@ -93,7 +116,10 @@ export async function ensureSchema(): Promise<void> {
             UNIQUE (user_id, source_chunk_id, target_chunk_id, link_type)
         )
     `);
+    await db.query("ALTER TABLE cross_links ADD COLUMN IF NOT EXISTS workspace_id TEXT DEFAULT 'demo-user'");
+    await db.query("ALTER TABLE cross_links ALTER COLUMN workspace_id SET DEFAULT 'demo-user'");
     await db.query("CREATE INDEX IF NOT EXISTS cross_links_user_id_idx ON cross_links (user_id)");
+    await db.query("CREATE INDEX IF NOT EXISTS cross_links_workspace_id_idx ON cross_links (workspace_id)");
     await db.query(
         "CREATE INDEX IF NOT EXISTS cross_links_source_chunk_id_idx ON cross_links (source_chunk_id)",
     );
