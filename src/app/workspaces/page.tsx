@@ -20,7 +20,7 @@ type ApiResult = {
 };
 
 export default function WorkspacesPage() {
-    const { isLoaded, isSignedIn, user } = useUser();
+    const { isLoaded, isSignedIn } = useUser();
     const [accountId, setAccountId] = useState("");
     const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
     const [loading, setLoading] = useState(true);
@@ -31,12 +31,12 @@ export default function WorkspacesPage() {
     const [creating, setCreating] = useState(false);
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (!isLoaded || !isSignedIn) {
             return;
         }
 
         const storedAccountId = window.localStorage.getItem("decision-engine-account-id") ?? "";
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setAccountId(storedAccountId);
 
         if (!storedAccountId) {

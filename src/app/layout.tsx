@@ -15,8 +15,8 @@ const codeFont = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Decision Engine",
-  description: "Enterprise decision reconstruction across Slack, GitHub, and Gmail",
+  title: "AHB26 - AI Context Engine",
+  description: "Unified context platform for teams. Store, organize, and reason about company decisions from Slack, GitHub, Gmail, and more.",
 };
 
 export default function RootLayout({
