@@ -1,3 +1,5 @@
+"use client";
+
 import { SignIn } from "@clerk/nextjs";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 
