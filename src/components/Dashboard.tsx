@@ -50,6 +50,7 @@ export function Dashboard() {
     const [isInitializingAccount, setIsInitializingAccount] = useState(true);
     const [workspaceName, setWorkspaceName] = useState("My Workspace");
     const [workspaceId, setWorkspaceId] = useState("");
+    const [activeConnectionProvider, setActiveConnectionProvider] = useState<"slack" | "github" | "gmail" | null>(null);
     const [slackChannels, setSlackChannels] = useState("");
     const [githubOwner, setGithubOwner] = useState("");
     const [githubRepo, setGithubRepo] = useState("");
@@ -61,6 +62,32 @@ export function Dashboard() {
     const [loadingGmail, setLoadingGmail] = useState(false);
     const [loadingSync, setLoadingSync] = useState(false);
     const [message, setMessage] = useState("");
+
+    const closeConnectionWindow = () => {
+        setActiveConnectionProvider(null);
+    };
+
+    const openConnectionWindow = (provider: "slack" | "github" | "gmail") => {
+        setActiveConnectionProvider(provider);
+    };
+
+    const connectionTitle =
+        activeConnectionProvider === "slack"
+            ? "Connect Slack"
+            : activeConnectionProvider === "github"
+                ? "Connect GitHub"
+                : activeConnectionProvider === "gmail"
+                    ? "Connect Gmail"
+                    : "";
+
+    const connectionDescription =
+        activeConnectionProvider === "slack"
+            ? "Add the Slack channel IDs you want to sync."
+            : activeConnectionProvider === "github"
+                ? "Add the GitHub owner and repository you want to connect."
+                : activeConnectionProvider === "gmail"
+                    ? "Add the Gmail search query you want to sync."
+                    : "";
 
     const loadStats = async (wsId: string) => {
         try {
@@ -240,6 +267,7 @@ export function Dashboard() {
             const data = await readJsonResponse<ApiResult>(response);
             if (data.ok) {
                 setMessage(`✅ ${provider} connected`);
+                closeConnectionWindow();
                 await loadStats(workspaceId);
             } else {
                 setMessage(`❌ Failed to connect ${provider}`);
@@ -358,11 +386,11 @@ export function Dashboard() {
                                         className="mb-4 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)]"
                                     />
                                     <button
-                                        onClick={() => void connectProvider("slack")}
+                                        onClick={() => openConnectionWindow("slack")}
                                         disabled={loadingSlack}
                                         className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2 font-semibold text-[var(--foreground)] hover:border-[var(--foreground)] disabled:opacity-60"
                                     >
-                                        {loadingSlack ? "Connecting..." : "Connect Slack"}
+                                        {loadingSlack ? "Opening..." : "Open connection window"}
                                     </button>
                                     <p className="mt-2 text-xs text-[var(--muted)]">Uses demo defaults if you leave this empty.</p>
                                 </div>
@@ -388,11 +416,11 @@ export function Dashboard() {
                                         className="mb-4 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)]"
                                     />
                                     <button
-                                        onClick={() => void connectProvider("github")}
+                                        onClick={() => openConnectionWindow("github")}
                                         disabled={loadingGithub}
                                         className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2 font-semibold text-[var(--foreground)] hover:border-[var(--foreground)] disabled:opacity-60"
                                     >
-                                        {loadingGithub ? "Connecting..." : "Connect GitHub"}
+                                        {loadingGithub ? "Opening..." : "Open connection window"}
                                     </button>
                                     <p className="mt-2 text-xs text-[var(--muted)]">Uses demo owner/repo if you leave these empty.</p>
                                 </div>
@@ -411,11 +439,11 @@ export function Dashboard() {
                                         className="mb-4 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)]"
                                     />
                                     <button
-                                        onClick={() => void connectProvider("gmail")}
+                                        onClick={() => openConnectionWindow("gmail")}
                                         disabled={loadingGmail}
                                         className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2 font-semibold text-[var(--foreground)] hover:border-[var(--foreground)] disabled:opacity-60"
                                     >
-                                        {loadingGmail ? "Connecting..." : "Connect Gmail"}
+                                        {loadingGmail ? "Opening..." : "Open connection window"}
                                     </button>
                                     <p className="mt-2 text-xs text-[var(--muted)]">Defaults to a 30 day query if you change nothing.</p>
                                 </div>
@@ -465,6 +493,123 @@ export function Dashboard() {
                             </div>
                         </div>
                     </>
+                )}
+
+                {activeConnectionProvider && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-4 py-6 backdrop-blur-sm">
+                        <div className="w-full max-w-xl rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-[0_30px_90px_rgba(0,0,0,0.45)] md:p-8">
+                            <div className="mb-6 flex items-start justify-between gap-4">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[var(--muted)]">Connection window</p>
+                                    <h3 className="mt-2 text-2xl font-bold text-[var(--foreground)]">{connectionTitle}</h3>
+                                    <p className="mt-2 text-sm text-[var(--muted)]">{connectionDescription}</p>
+                                </div>
+                                <button
+                                    onClick={closeConnectionWindow}
+                                    className="rounded-full border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm font-semibold text-[var(--foreground)] hover:border-[var(--foreground)]"
+                                >
+                                    Close
+                                </button>
+                            </div>
+
+                            {activeConnectionProvider === "slack" && (
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">Slack channel IDs</label>
+                                        <input
+                                            type="text"
+                                            placeholder="C12345,C67890"
+                                            value={slackChannels}
+                                            onChange={(e) => setSlackChannels(e.target.value)}
+                                            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--muted)]"
+                                        />
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => void connectProvider("slack")}
+                                            className="flex-1 rounded-lg border border-[var(--primary)] bg-[var(--primary)] px-4 py-3 font-semibold text-[var(--primary-foreground)]"
+                                        >
+                                            Connect Slack
+                                        </button>
+                                        <button
+                                            onClick={closeConnectionWindow}
+                                            className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 font-semibold text-[var(--foreground)]"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeConnectionProvider === "github" && (
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">GitHub owner</label>
+                                        <input
+                                            type="text"
+                                            placeholder="owner"
+                                            value={githubOwner}
+                                            onChange={(e) => setGithubOwner(e.target.value)}
+                                            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--muted)]"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">Repository</label>
+                                        <input
+                                            type="text"
+                                            placeholder="repo"
+                                            value={githubRepo}
+                                            onChange={(e) => setGithubRepo(e.target.value)}
+                                            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--muted)]"
+                                        />
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => void connectProvider("github")}
+                                            className="flex-1 rounded-lg border border-[var(--primary)] bg-[var(--primary)] px-4 py-3 font-semibold text-[var(--primary-foreground)]"
+                                        >
+                                            Connect GitHub
+                                        </button>
+                                        <button
+                                            onClick={closeConnectionWindow}
+                                            className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 font-semibold text-[var(--foreground)]"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeConnectionProvider === "gmail" && (
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">Gmail query</label>
+                                        <input
+                                            type="text"
+                                            placeholder="newer_than:30d"
+                                            value={gmailQuery}
+                                            onChange={(e) => setGmailQuery(e.target.value)}
+                                            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--muted)]"
+                                        />
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => void connectProvider("gmail")}
+                                            className="flex-1 rounded-lg border border-[var(--primary)] bg-[var(--primary)] px-4 py-3 font-semibold text-[var(--primary-foreground)]"
+                                        >
+                                            Connect Gmail
+                                        </button>
+                                        <button
+                                            onClick={closeConnectionWindow}
+                                            className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 font-semibold text-[var(--foreground)]"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 )}
             </div>
         </main>
