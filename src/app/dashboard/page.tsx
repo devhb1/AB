@@ -1,17 +1,30 @@
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+"use client";
+
+import { useAuth } from "@clerk/nextjs";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Dashboard } from "@/components/Dashboard";
 
-export const metadata = {
-    title: "Dashboard - AHB26",
-    description: "Manage your workspace and connectors",
-};
+export default function DashboardPage() {
+    const { isLoaded, userId } = useAuth();
+    const router = useRouter();
 
-export default async function DashboardPage() {
-    const { userId } = await auth();
+    useEffect(() => {
+        if (isLoaded && !userId) {
+            router.push("/sign-in");
+        }
+    }, [isLoaded, userId, router]);
+
+    if (!isLoaded) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
+                <div className="text-[var(--foreground)]">Loading...</div>
+            </div>
+        );
+    }
 
     if (!userId) {
-        redirect("/sign-in");
+        return null;
     }
 
     return <Dashboard />;

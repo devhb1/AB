@@ -197,7 +197,13 @@ export function Dashboard() {
                         <div className="text-sm text-[var(--muted)]">
                             Welcome, {user?.firstName || "Team"}
                         </div>
-                        <SignOutButton redirectUrl="/" />
+                        <div className="pl-4 border-l border-[var(--border)]">
+                            <SignOutButton redirectUrl="/">
+                                <button className="px-4 py-2 rounded-lg bg-[var(--surface-muted)] hover:bg-[var(--surface)] text-[var(--foreground)] border border-[var(--border)] hover:border-[var(--muted)] font-semibold text-sm transition-all duration-200">
+                                    Sign Out
+                                </button>
+                            </SignOutButton>
+                        </div>
                     </div>
                 </div>
             </header>
