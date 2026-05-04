@@ -10,7 +10,7 @@
         "start": "npm --workspace decision-engine run start",
         "lint": "npm --workspace decision-engine run lint",
         "typecheck": "npm --workspace decision-engine run typecheck",
-        "vercel-build": "npm --workspace decision-engine run build"
+        "vercel-build": "npm --workspace decision-engine run build && rm -rf .next && cp -R decision-engine/.next .next"
     },
     "dependencies": {
         "next": "16.2.4",
