@@ -73,6 +73,19 @@ export function Dashboard() {
                 }
             } else if (user?.id) {
                 // Create account for this user
+                const fullName = user.fullName || user.firstName || "Team User";
+                const email = user.primaryEmailAddress?.emailAddress;
+
+                if (!email) {
+                    setMessage("❌ Unable to access email address. Please ensure your email is verified in account settings.");
+                    return;
+                }
+
+                if (fullName.length < 2) {
+                    setMessage("❌ Name must be at least 2 characters. Please update your profile name.");
+                    return;
+                }
+
                 const response = await fetch("/api/accounts", {
                     method: "POST",
                     headers: {
@@ -80,15 +93,30 @@ export function Dashboard() {
                         "x-user-id": user.id,
                     },
                     body: JSON.stringify({
-                        name: user.fullName || "Team",
-                        email: user.primaryEmailAddress?.emailAddress || "",
+                        name: fullName,
+                        email: email,
                     }),
                 });
+
+                if (!response.ok) {
+                    const errorData = (await response.json()) as { error?: string; details?: Record<string, unknown>; received?: Record<string, unknown> };
+                    console.error("Account creation failed:", {
+                        status: response.status,
+                        error: errorData.error,
+                        details: errorData.details,
+                        sent: { fullName, email }
+                    });
+                    setMessage(`❌ Failed to create account: ${errorData.error || "Unknown error"}`); return;
+                }
+
                 const data = (await response.json()) as ApiResult & { account?: { id: string } };
                 if (data.ok && data.account) {
                     const accId = data.account.id;
                     setAccountId(accId);
                     window.localStorage.setItem(ACCOUNT_KEY, accId);
+                    setMessage("✅ Account created successfully");
+                } else {
+                    setMessage(`❌ Account creation returned no data: ${JSON.stringify(data)}`);
                 }
             }
         };

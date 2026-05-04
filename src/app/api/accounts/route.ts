@@ -9,7 +9,23 @@ const accountSchema = z.object({
 
 export async function POST(request: NextRequest) {
     try {
-        const input = accountSchema.parse(await request.json());
+        const body = await request.json();
+        const result = accountSchema.safeParse(body);
+
+        if (!result.success) {
+            const errors = result.error.flatten().fieldErrors;
+            return NextResponse.json(
+                {
+                    ok: false,
+                    error: "Validation failed",
+                    details: errors,
+                    received: { name: body.name, email: body.email }
+                },
+                { status: 400 }
+            );
+        }
+
+        const input = result.data;
         const account = await createAccount({
             id: crypto.randomUUID(),
             name: input.name,
@@ -19,6 +35,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ ok: true, account });
     } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";
-        return NextResponse.json({ ok: false, error: message }, { status: 400 });
+        console.error("Account creation error:", error);
+        return NextResponse.json({ ok: false, error: message }, { status: 500 });
     }
 }
