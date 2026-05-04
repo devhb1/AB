@@ -181,9 +181,9 @@ export function Dashboard() {
     };
 
     return (
-        <main className="min-h-screen bg-white">
+        <main className="min-h-screen bg-slate-50">
             {/* Header */}
-            <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/50 backdrop-blur-sm">
+            <header className="sticky top-0 z-50 border-b border-slate-200 bg-slate-50/90 backdrop-blur-sm">
                 <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center">
@@ -211,8 +211,8 @@ export function Dashboard() {
 
                 {/* Workspace Section */}
                 {!workspaceId ? (
-                    <div className="max-w-md mx-auto">
-                        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+                    <div className="max-w-lg mx-auto">
+                        <div className="rounded-2xl border border-slate-200 bg-white p-10 shadow-lg ring-1 ring-slate-100">
                             <h2 className="text-2xl font-bold text-black mb-2">Create Your Workspace</h2>
                             <p className="text-slate-600 mb-6">
                                 Set up a workspace to start syncing your team context from Slack, GitHub, and Gmail.
@@ -236,7 +236,7 @@ export function Dashboard() {
                 ) : (
                     <>
                         {/* Workspace Info */}
-                        <div className="mb-12 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+                        <div className="mb-12 rounded-2xl border border-slate-200 bg-white p-8 shadow-md ring-1 ring-slate-100">
                             <h2 className="text-2xl font-bold text-black mb-6">Workspace</h2>
                             <div className="space-y-3">
                                 <p className="text-slate-600">
@@ -258,7 +258,7 @@ export function Dashboard() {
                             <h2 className="text-2xl font-bold text-black mb-6">Connect Your Sources</h2>
                             <div className="grid md:grid-cols-3 gap-6">
                                 {/* Slack */}
-                                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md ring-1 ring-slate-100">
                                     <h3 className="text-lg font-semibold text-black mb-2">Slack</h3>
                                     <p className="text-sm text-slate-600 mb-4">
                                         Sync your Slack channel history and discussions.
@@ -280,7 +280,7 @@ export function Dashboard() {
                                 </div>
 
                                 {/* GitHub */}
-                                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md ring-1 ring-slate-100">
                                     <h3 className="text-lg font-semibold text-black mb-2">GitHub</h3>
                                     <p className="text-sm text-slate-600 mb-4">
                                         Sync commits, PRs, and issues from your repos.
@@ -309,7 +309,7 @@ export function Dashboard() {
                                 </div>
 
                                 {/* Gmail */}
-                                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md ring-1 ring-slate-100">
                                     <h3 className="text-lg font-semibold text-black mb-2">Gmail</h3>
                                     <p className="text-sm text-slate-600 mb-4">
                                         Sync important email threads and conversations.
@@ -332,7 +332,7 @@ export function Dashboard() {
                             </div>
                         </div>
 
-                        <div className="rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 to-white p-8 shadow-sm">
+                        <div className="rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 to-white p-8 shadow-md ring-1 ring-slate-100">
                             <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                                 <div>
                                     <h2 className="text-2xl font-bold text-black">Sync your workspace</h2>

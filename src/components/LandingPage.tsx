@@ -7,7 +7,7 @@ export function LandingPage() {
     const { isSignedIn } = useUser();
 
     return (
-        <main className="min-h-screen bg-[#fbfaf7] text-slate-900">
+        <main className="min-h-screen bg-slate-50 text-slate-900">
             <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-[#fbfaf7]/90 backdrop-blur">
                 <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -79,7 +79,7 @@ export function LandingPage() {
                         </div>
                     </div>
 
-                    <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_20px_80px_rgba(15,23,42,0.08)]">
+                    <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-lg ring-1 ring-slate-100">
                         <div className="mb-6 flex items-center justify-between">
                             <div>
                                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Dashboard preview</p>
@@ -110,17 +110,17 @@ export function LandingPage() {
 
             <section className="mx-auto max-w-6xl px-6 pb-20 md:pb-28">
                 <div className="grid gap-6 lg:grid-cols-3">
-                    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md ring-1 ring-slate-100">
                         <p className="text-sm font-semibold uppercase tracking-[0.28em] text-slate-500">Unified memory</p>
                         <p className="mt-4 text-lg font-semibold text-slate-950">One workspace for team context.</p>
                         <p className="mt-2 text-sm leading-6 text-slate-600">Create a single source of truth for decisions and follow-up.</p>
                     </div>
-                    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md ring-1 ring-slate-100">
                         <p className="text-sm font-semibold uppercase tracking-[0.28em] text-slate-500">Fast onboarding</p>
                         <p className="mt-4 text-lg font-semibold text-slate-950">Sign in, create workspace, connect sources.</p>
                         <p className="mt-2 text-sm leading-6 text-slate-600">The dashboard is set up for quick setup and first sync.</p>
                     </div>
-                    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md ring-1 ring-slate-100">
                         <p className="text-sm font-semibold uppercase tracking-[0.28em] text-slate-500">Private by default</p>
                         <p className="mt-4 text-lg font-semibold text-slate-950">Keep your data under your control.</p>
                         <p className="mt-2 text-sm leading-6 text-slate-600">Built to organize internal knowledge without adding noise.</p>
