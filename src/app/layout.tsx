@@ -46,13 +46,13 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
-        <ThemeProvider>
-          <ClerkProvider
-            publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "pk_test_YWNjZXB0ZWQtZWVsLTc2LmNsZXJrLmFjY291bnRzLmRldiQ"}
-          >
+        <ClerkProvider
+          publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "pk_test_YWNjZXB0ZWQtZWVsLTc2LmNsZXJrLmFjY291bnRzLmRldiQ"}
+        >
+          <ThemeProvider>
             {children}
-          </ClerkProvider>
-        </ThemeProvider>
+          </ThemeProvider>
+        </ClerkProvider>
       </body>
     </html>
   );
