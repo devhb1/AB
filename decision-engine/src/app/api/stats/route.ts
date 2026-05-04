@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { companyName, env } from "@/lib/config";
-import { getCorpusStats, getSourceStats } from "@/lib/db";
+import { getCorpusStatsForUser, getSourceStats } from "@/lib/db";
 
-export async function GET() {
-    const [sources, corpus] = await Promise.all([getSourceStats(), getCorpusStats()]);
+export async function GET(request: NextRequest) {
+    const userId = request.nextUrl.searchParams.get("userId") ?? request.headers.get("x-user-id") ?? "demo-user";
+    const [sources, corpus] = await Promise.all([getSourceStats(userId), getCorpusStatsForUser(userId)]);
 
     const readiness = {
         slack: Boolean(env.SLACK_BOT_TOKEN),
@@ -16,6 +17,7 @@ export async function GET() {
     return NextResponse.json({
         ok: true,
         companyName,
+        userId,
         readiness,
         corpus,
         sources,

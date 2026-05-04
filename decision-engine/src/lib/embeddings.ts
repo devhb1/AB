@@ -36,3 +36,30 @@ export async function synthesizeDecisionTimeline(params: {
 
     return completion.output_text;
 }
+
+export async function synthesizeReasoningTrace(params: {
+    commitTitle: string;
+    commitContent: string;
+    evidenceBlocks: string[];
+}): Promise<string> {
+    const prompt = [
+        "You are an enterprise synthesis engine.",
+        "Write a short reasoning trace that explains why a GitHub commit happened.",
+        "Use only the evidence provided.",
+        "Output 2-4 sentences and mention Slack or Gmail only if present in the evidence.",
+        "If the evidence is weak, say that the trace is inferred.",
+        "",
+        `Commit: ${params.commitTitle}`,
+        `Details: ${params.commitContent}`,
+        "",
+        "Evidence:",
+        ...params.evidenceBlocks.map((block, index) => `(${index + 1}) ${block}`),
+    ].join("\n");
+
+    const completion = await client.responses.create({
+        model: "gpt-4.1-mini",
+        input: prompt,
+    });
+
+    return completion.output_text;
+}

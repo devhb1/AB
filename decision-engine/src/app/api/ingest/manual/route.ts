@@ -22,13 +22,14 @@ export async function POST(request: NextRequest) {
     try {
         assertIngestionAuth(request);
         const body = manualSchema.parse(await request.json());
+        const userId = request.headers.get("x-user-id") ?? "demo-user";
         const records = body.records.map((record) => ({
             ...record,
             metadata: record.metadata ?? {},
         }));
-        const ingested = await ingestRecords(body.sourceType, records);
+        const summary = await ingestRecords(body.sourceType, records, userId);
 
-        return NextResponse.json({ ok: true, ingested });
+        return NextResponse.json({ ok: true, userId, ...summary });
     } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";
         return NextResponse.json({ ok: false, error: message }, { status: 400 });

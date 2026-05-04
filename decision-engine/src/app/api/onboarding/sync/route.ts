@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { assertIngestionAuth } from "@/lib/auth";
 import { ingestSlackEvents } from "@/lib/connectors/slack";
 import { ingestGithubEvents } from "@/lib/connectors/github";
 import { ingestGmailEvents } from "@/lib/connectors/gmail";
@@ -8,14 +7,13 @@ import { buildCompanyHealthReport } from "@/lib/relationship-scraper";
 
 export async function POST(request: NextRequest) {
     try {
-        assertIngestionAuth(request);
         const body = await request.json().catch(() => ({}));
         const userId = request.headers.get("x-user-id") ?? body.userId ?? "demo-user";
 
         const [slack, github, gmail] = await Promise.all([
-            ingestSlackEvents({ channelIds: body.channelIds, limit: body.slackLimit }),
-            ingestGithubEvents({ owner: body.owner, repo: body.repo, perPage: body.githubPerPage }),
-            ingestGmailEvents({ query: body.gmailQuery, maxResults: body.gmailMaxResults }),
+            ingestSlackEvents({ channelIds: body.channelIds, limit: body.slackLimit ?? 30 }),
+            ingestGithubEvents({ owner: body.owner, repo: body.repo, perPage: body.githubPerPage ?? 30 }),
+            ingestGmailEvents({ query: body.gmailQuery, maxResults: body.gmailMaxResults ?? 25 }),
         ]);
 
         const [slackSummary, githubSummary, gmailSummary] = await Promise.all([
@@ -29,6 +27,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             ok: true,
             userId,
+            syncWindowDays: body.syncWindowDays ?? 30,
             slack: { fetched: slack.length, ...slackSummary },
             github: { fetched: github.length, ...githubSummary },
             gmail: { fetched: gmail.length, ...gmailSummary },

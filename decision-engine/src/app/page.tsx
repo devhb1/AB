@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { LandingPage } from "@/components/LandingPage";
+import { DecisionMemo } from "@/components/DecisionMemo";
 
 type ApiResult = {
   ok: boolean;
@@ -9,6 +11,7 @@ type ApiResult = {
 
 type DashboardStats = {
   companyName: string;
+  userId?: string;
   readiness: Record<string, boolean>;
   corpus: {
     totalChunks: number;
@@ -21,21 +24,50 @@ type DashboardStats = {
   }>;
 };
 
-async function postJson(url: string, payload: Record<string, unknown>): Promise<ApiResult> {
+type SyncResult = ApiResult & {
+  userId?: string;
+  totalIngested?: number;
+  hardLinksCreated?: number;
+  conflictLinksCreated?: number;
+  reasoningTraces?: number;
+  report?: {
+    topUndocumentedDecisions: Array<{
+      id: string;
+      title: string;
+      source_type: string;
+      author: string | null;
+      occurred_at: string | null;
+    }>;
+    recentCrossLinks: Array<{
+      source_title: string;
+      target_title: string;
+      link_type: string;
+      similarity: number;
+      explanation: string;
+    }>;
+  };
+};
+
+async function postJson(
+  url: string,
+  payload: Record<string, unknown>,
+  userId: string,
+): Promise<ApiResult> {
   const response = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "x-user-id": userId },
     body: JSON.stringify(payload),
   });
   return response.json();
 }
 
 export default function Home() {
+  const [userId, setUserId] = useState("demo-user");
   const [question, setQuestion] = useState(
     "What changed in the company this week, and why?",
   );
   const [queryResult, setQueryResult] = useState<ApiResult | null>(null);
-  const [ingestResult, setIngestResult] = useState<ApiResult | null>(null);
+  const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [manualSourceType, setManualSourceType] = useState<"support" | "meeting">("support");
   const [manualTitle, setManualTitle] = useState("Customer escalation: billing issue");
@@ -48,7 +80,7 @@ export default function Home() {
   const [loadingManual, setLoadingManual] = useState(false);
 
   useEffect(() => {
-    void fetch("/api/stats")
+    void fetch(`/api/stats?userId=${encodeURIComponent(userId)}`)
       .then((response) => response.json())
       .then((data: DashboardStats & { ok?: boolean }) => {
         if (data?.companyName) {
@@ -56,7 +88,7 @@ export default function Home() {
         }
       })
       .catch(() => undefined);
-  }, []);
+  }, [userId]);
 
   const memo = useMemo(() => {
     if (!queryResult?.ok || typeof queryResult.memo !== "string") {
@@ -68,15 +100,40 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_20%_10%,#f6e7cf_0,#f6e7cf_18%,#f3f7f9_55%,#e9eef5_100%)] text-slate-900">
       <div className="mx-auto max-w-6xl px-6 py-10">
+        <LandingPage />
+
         <header className="mb-8 rounded-3xl border border-slate-200/70 bg-white/80 p-8 shadow-xl backdrop-blur">
-          <p className="mb-2 text-sm uppercase tracking-[0.28em] text-amber-700">YC War Room</p>
-          <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
+          <p className="mb-2 text-sm uppercase tracking-[0.28em] text-amber-700">Active synthesis engine</p>
+          <h2 className="text-4xl font-semibold leading-tight md:text-5xl">
             {stats?.companyName ?? "Decision Engine"}
-          </h1>
+          </h2>
           <p className="mt-3 max-w-3xl text-slate-700">
-            Connect Slack, GitHub, Gmail, support, and meetings, then generate a timeline that
+            Sync Slack, GitHub, Gmail, support, and meetings into a live decision graph that
             explains why a company decision happened.
           </p>
+          <div className="mt-5 grid gap-3 md:grid-cols-[1fr_auto]">
+            <label className="block">
+              <span className="mb-2 block text-xs uppercase tracking-[0.24em] text-slate-500">Workspace / user id</span>
+              <input
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none ring-amber-400 transition focus:ring"
+                value={userId}
+                onChange={(event) => setUserId(event.target.value)}
+                placeholder="demo-user"
+              />
+            </label>
+            <div className="flex items-end">
+              <button
+                className="rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                onClick={() => void fetch(`/api/stats?userId=${encodeURIComponent(userId)}`).then((response) => response.json()).then((data: DashboardStats & { ok?: boolean }) => {
+                  if (data?.companyName) {
+                    setStats(data);
+                  }
+                })}
+              >
+                Refresh workspace
+              </button>
+            </div>
+          </div>
         </header>
 
         <section className="mb-6 grid gap-4 md:grid-cols-4">
@@ -88,24 +145,24 @@ export default function Home() {
 
         <section className="grid gap-6 md:grid-cols-2">
           <div className="rounded-3xl border border-slate-200/70 bg-white p-6 shadow-lg">
-            <h2 className="mb-4 text-xl font-semibold">1) Ingest Sources</h2>
+            <h2 className="mb-4 text-xl font-semibold">1) One-Click Sync</h2>
             <p className="mb-4 text-sm text-slate-600">
-              Pull latest events from Slack channels, GitHub repo activity, Gmail threads, and
-              manual support/meeting notes into Postgres + pgvector.
+              Pull the last 30 days of Slack, GitHub, and Gmail into a decision graph, then surface
+              a company health report immediately after sync.
             </p>
             <button
               className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-60"
               onClick={async () => {
                 setLoadingIngest(true);
-                setIngestResult(await postJson("/api/ingest/all", {}));
+                setSyncResult(await postJson("/api/onboarding/sync", { userId }, userId));
                 setLoadingIngest(false);
               }}
               disabled={loadingIngest}
             >
-              {loadingIngest ? "Ingesting..." : "Run Ingestion"}
+              {loadingIngest ? "Syncing..." : "Sync Company"}
             </button>
             <pre className="mt-4 max-h-60 overflow-auto rounded-xl bg-slate-950 p-4 text-xs text-emerald-300">
-              {JSON.stringify(ingestResult, null, 2)}
+              {JSON.stringify(syncResult, null, 2)}
             </pre>
           </div>
 
@@ -120,7 +177,7 @@ export default function Home() {
               className="mt-4 rounded-xl bg-amber-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-500 disabled:opacity-60"
               onClick={async () => {
                 setLoadingQuery(true);
-                setQueryResult(await postJson("/api/query/decision", { question }));
+                setQueryResult(await postJson("/api/query/decision", { question, userId }, userId));
                 setLoadingQuery(false);
               }}
               disabled={loadingQuery}
@@ -132,6 +189,9 @@ export default function Home() {
               <p className="mt-2">
                 The product answers the question every manager asks: what changed, who said what,
                 and what action followed.
+              </p>
+              <p className="mt-4 text-xs uppercase tracking-[0.24em] text-slate-500">
+                Decision graph mode • hard links • reasoning trace • conflict watcher
               </p>
             </div>
           </div>
@@ -170,17 +230,22 @@ export default function Home() {
               onClick={async () => {
                 setLoadingManual(true);
                 setManualResult(
-                  await postJson("/api/ingest/manual", {
-                    sourceType: manualSourceType,
-                    records: [
-                      {
-                        externalId: `${manualSourceType}-${Date.now()}`,
-                        title: manualTitle,
-                        content: manualContent,
-                        metadata: { origin: "manual-demo" },
-                      },
-                    ],
-                  }),
+                  await postJson(
+                    "/api/ingest/manual",
+                    {
+                      sourceType: manualSourceType,
+                      records: [
+                        {
+                          externalId: `${manualSourceType}-${Date.now()}`,
+                          title: manualTitle,
+                          content: manualContent,
+                          metadata: { origin: "manual-demo" },
+                        },
+                      ],
+                      userId,
+                    },
+                    userId,
+                  ),
                 );
                 setLoadingManual(false);
               }}
@@ -206,8 +271,13 @@ export default function Home() {
         </section>
 
         <section className="mt-6 rounded-3xl border border-slate-200/70 bg-white p-6 shadow-lg">
-          <h2 className="mb-3 text-xl font-semibold">Decision Memo</h2>
-          <article className="prose max-w-none whitespace-pre-wrap text-slate-800">{memo}</article>
+          <DecisionMemo
+            memo={memo}
+            userId={userId}
+            evidenceCount={Array.isArray(queryResult?.evidence) ? queryResult.evidence.length : 0}
+            linkedTopics={syncResult?.report?.recentCrossLinks?.map((link) => `${link.source_title} → ${link.target_title}`) ?? []}
+            report={syncResult?.report}
+          />
         </section>
       </div>
     </main>
