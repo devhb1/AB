@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, IBM_Plex_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 const displayFont = Space_Grotesk({
@@ -25,9 +26,33 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${displayFont.variable} ${codeFont.variable} h-full antialiased`}>
+    <html lang="en" className={`${displayFont.variable} ${codeFont.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (() => {
+                try {
+                  const storageKey = 'ahb26-theme';
+                  const savedTheme = localStorage.getItem(storageKey);
+                  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                  const resolvedTheme = savedTheme && savedTheme !== 'system' ? savedTheme : systemTheme;
+                  document.documentElement.dataset.theme = resolvedTheme;
+                  document.documentElement.style.colorScheme = resolvedTheme;
+                } catch (error) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
-        <ClerkProvider>{children}</ClerkProvider>
+        <ThemeProvider>
+          <ClerkProvider
+            publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "pk_test_YWNjZXB0ZWQtZWVsLTc2LmNsZXJrLmFjY291bnRzLmRldiQ"}
+          >
+            {children}
+          </ClerkProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

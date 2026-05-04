@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useUser, SignOutButton } from "@clerk/nextjs";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
 type ApiResult = {
     ok: boolean;
@@ -192,6 +193,7 @@ export function Dashboard() {
                         <span className="text-2xl font-extrabold text-[var(--foreground)]">AHB26</span>
                     </div>
                     <div className="flex items-center gap-4">
+                        <ThemeSwitcher />
                         <div className="text-sm text-[var(--muted)]">
                             Welcome, {user?.firstName || "Team"}
                         </div>

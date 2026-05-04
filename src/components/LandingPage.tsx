@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
 export function LandingPage() {
     const { isSignedIn } = useUser();
@@ -20,20 +21,24 @@ export function LandingPage() {
                         </div>
                     </div>
 
-                    {!isSignedIn ? (
-                        <div className="flex gap-3">
-                            <Link href="/sign-in" className="rounded-full px-4 py-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]">
-                                Sign in
+                    <div className="flex items-center gap-3">
+                        <ThemeSwitcher />
+
+                        {!isSignedIn ? (
+                            <div className="flex gap-3">
+                                <Link href="/sign-in" className="rounded-full px-4 py-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]">
+                                    Sign in
+                                </Link>
+                                <Link href="/sign-up" className="rounded-full border border-[var(--primary)] bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-[var(--primary-foreground)] transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-900/20 dark:hover:shadow-black/30">
+                                    Get started
+                                </Link>
+                            </div>
+                        ) : (
+                            <Link href="/dashboard" className="rounded-full border border-[var(--primary)] bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-[var(--primary-foreground)] transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-900/20 dark:hover:shadow-black/30">
+                                Dashboard
                             </Link>
-                            <Link href="/sign-up" className="rounded-full border border-[var(--primary)] bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-[var(--primary-foreground)] transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-900/20 dark:hover:shadow-black/30">
-                                Get started
-                            </Link>
-                        </div>
-                    ) : (
-                        <Link href="/dashboard" className="rounded-full border border-[var(--primary)] bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-[var(--primary-foreground)] transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-900/20 dark:hover:shadow-black/30">
-                            Dashboard
-                        </Link>
-                    )}
+                        )}
+                    </div>
                 </div>
             </header>
 

@@ -1,15 +1,22 @@
 import { SignIn } from "@clerk/nextjs";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
 export default function SignInPage() {
     return (
         <div className="min-h-screen bg-[var(--background)] px-6 py-16 text-[var(--foreground)]">
             <div className="mx-auto flex w-full max-w-2xl flex-col items-center pt-12">
-                <div className="mb-6 text-center">
-                    <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[var(--muted)]">AHB26</p>
-                    <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-[var(--foreground)]">Sign in</h1>
-                    <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                        Access your dashboard, create workspaces, and connect your team sources.
-                    </p>
+                <div className="mb-6 flex w-full items-center justify-between gap-4">
+                    <div className="text-left">
+                        <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[var(--muted)]">AHB26</p>
+                        <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-[var(--foreground)]">Sign in</h1>
+                        <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+                            Access your dashboard, create workspaces, and connect your team sources.
+                        </p>
+                    </div>
+
+                    <div className="shrink-0">
+                        <ThemeSwitcher />
+                    </div>
                 </div>
 
                 <div className="relative w-full">
