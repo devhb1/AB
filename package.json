@@ -1,0 +1,18 @@
+{
+    "name": "y-comb-workspace",
+    "private": true,
+    "scripts": {
+        "dev": "npm --prefix decision-engine run dev",
+        "build": "npm --prefix decision-engine run build",
+        "start": "npm --prefix decision-engine run start",
+        "lint": "npm --prefix decision-engine run lint",
+        "typecheck": "npm --prefix decision-engine run typecheck",
+        "vercel-build": "npm --prefix decision-engine run build",
+        "postinstall": "npm install --prefix decision-engine"
+    },
+    "dependencies": {
+        "next": "16.2.4",
+        "react": "19.2.4",
+        "react-dom": "19.2.4"
+    }
+}
