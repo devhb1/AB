@@ -4,16 +4,31 @@ import { ingestGithubEvents } from "@/lib/connectors/github";
 import { ingestGmailEvents } from "@/lib/connectors/gmail";
 import { ingestRecords } from "@/lib/ingestion";
 import { buildCompanyHealthReport } from "@/lib/relationship-scraper";
+import { getWorkspaceConnectionMap } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json().catch(() => ({}));
-        const userId = request.headers.get("x-user-id") ?? body.userId ?? "demo-user";
+        const userId = request.headers.get("x-user-id") ?? body.userId ?? body.workspaceId ?? "demo-user";
+        const connections = await getWorkspaceConnectionMap(userId);
+        const slackConnection = connections.slack ?? {};
+        const githubConnection = connections.github ?? {};
+        const gmailConnection = connections.gmail ?? {};
 
         const [slack, github, gmail] = await Promise.all([
-            ingestSlackEvents({ channelIds: body.channelIds, limit: body.slackLimit ?? 30 }),
-            ingestGithubEvents({ owner: body.owner, repo: body.repo, perPage: body.githubPerPage ?? 30 }),
-            ingestGmailEvents({ query: body.gmailQuery, maxResults: body.gmailMaxResults ?? 25 }),
+            ingestSlackEvents({
+                channelIds: body.channelIds ?? (slackConnection.channelIds as string[] | undefined),
+                limit: body.slackLimit ?? (slackConnection.limit as number | undefined) ?? 30,
+            }),
+            ingestGithubEvents({
+                owner: body.owner ?? (githubConnection.owner as string | undefined),
+                repo: body.repo ?? (githubConnection.repo as string | undefined),
+                perPage: body.githubPerPage ?? (githubConnection.perPage as number | undefined) ?? 30,
+            }),
+            ingestGmailEvents({
+                query: body.gmailQuery ?? (gmailConnection.query as string | undefined),
+                maxResults: body.gmailMaxResults ?? (gmailConnection.maxResults as number | undefined) ?? 25,
+            }),
         ]);
 
         const [slackSummary, githubSummary, gmailSummary] = await Promise.all([

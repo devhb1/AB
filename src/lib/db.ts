@@ -22,6 +22,36 @@ export async function ensureSchema(): Promise<void> {
     const db = getDbPool();
     await db.query("CREATE EXTENSION IF NOT EXISTS vector");
     await db.query(`
+        CREATE TABLE IF NOT EXISTS accounts (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    `);
+    await db.query(`
+        CREATE TABLE IF NOT EXISTS workspaces (
+            id TEXT PRIMARY KEY,
+            account_id TEXT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+            name TEXT NOT NULL,
+            slug TEXT NOT NULL UNIQUE,
+            description TEXT,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )
+    `);
+    await db.query(`
+        CREATE TABLE IF NOT EXISTS workspace_connections (
+            id BIGSERIAL PRIMARY KEY,
+            workspace_id TEXT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+            provider TEXT NOT NULL,
+            config JSONB NOT NULL DEFAULT '{}'::jsonb,
+            status TEXT NOT NULL DEFAULT 'connected',
+            connected_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            UNIQUE (workspace_id, provider)
+        )
+    `);
+    await db.query(`
     CREATE TABLE IF NOT EXISTS event_chunks (
       id BIGSERIAL PRIMARY KEY,
     user_id TEXT NOT NULL DEFAULT 'demo-user',
@@ -70,6 +100,137 @@ export async function ensureSchema(): Promise<void> {
     await db.query(
         "CREATE INDEX IF NOT EXISTS cross_links_target_chunk_id_idx ON cross_links (target_chunk_id)",
     );
+}
+
+export type AccountRecord = {
+    id: string;
+    name: string;
+    email: string;
+    created_at: string;
+};
+
+export type WorkspaceRecord = {
+    id: string;
+    account_id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    created_at: string;
+};
+
+export type WorkspaceConnectionRecord = {
+    workspace_id: string;
+    provider: string;
+    config: Record<string, unknown>;
+    status: string;
+    connected_at: string;
+    updated_at: string;
+};
+
+export async function createAccount(input: { id: string; name: string; email: string }): Promise<AccountRecord> {
+    const db = getDbPool();
+    await ensureSchema();
+    const result = await db.query<AccountRecord>(
+        `
+            INSERT INTO accounts (id, name, email)
+            VALUES ($1, $2, $3)
+            ON CONFLICT (email) DO UPDATE SET
+                name = EXCLUDED.name
+            RETURNING id, name, email, created_at
+        `,
+        [input.id, input.name, input.email],
+    );
+
+    return result.rows[0];
+}
+
+export async function createWorkspace(input: {
+    id: string;
+    accountId: string;
+    name: string;
+    slug: string;
+    description?: string;
+}): Promise<WorkspaceRecord> {
+    const db = getDbPool();
+    await ensureSchema();
+    const result = await db.query<WorkspaceRecord>(
+        `
+            INSERT INTO workspaces (id, account_id, name, slug, description)
+            VALUES ($1, $2, $3, $4, $5)
+            ON CONFLICT (slug) DO UPDATE SET
+                account_id = EXCLUDED.account_id,
+                name = EXCLUDED.name,
+                description = EXCLUDED.description
+            RETURNING id, account_id, name, slug, description, created_at
+        `,
+        [input.id, input.accountId, input.name, input.slug, input.description ?? null],
+    );
+
+    return result.rows[0];
+}
+
+export async function listWorkspacesForAccount(accountId: string): Promise<WorkspaceRecord[]> {
+    const db = getDbPool();
+    await ensureSchema();
+    const result = await db.query<WorkspaceRecord>(
+        `
+            SELECT id, account_id, name, slug, description, created_at
+            FROM workspaces
+            WHERE account_id = $1
+            ORDER BY created_at DESC
+        `,
+        [accountId],
+    );
+
+    return result.rows;
+}
+
+export async function upsertWorkspaceConnection(input: {
+    workspaceId: string;
+    provider: "slack" | "github" | "gmail" | "support" | "meeting";
+    config: Record<string, unknown>;
+    status?: string;
+}): Promise<WorkspaceConnectionRecord> {
+    const db = getDbPool();
+    await ensureSchema();
+    const result = await db.query<WorkspaceConnectionRecord>(
+        `
+            INSERT INTO workspace_connections (workspace_id, provider, config, status)
+            VALUES ($1, $2, $3::jsonb, $4)
+            ON CONFLICT (workspace_id, provider) DO UPDATE SET
+                config = EXCLUDED.config,
+                status = EXCLUDED.status,
+                updated_at = NOW()
+            RETURNING workspace_id, provider, config, status, connected_at, updated_at
+        `,
+        [input.workspaceId, input.provider, JSON.stringify(input.config), input.status ?? "connected"],
+    );
+
+    return result.rows[0];
+}
+
+export async function listWorkspaceConnections(workspaceId: string): Promise<WorkspaceConnectionRecord[]> {
+    const db = getDbPool();
+    await ensureSchema();
+    const result = await db.query<WorkspaceConnectionRecord>(
+        `
+            SELECT workspace_id, provider, config, status, connected_at, updated_at
+            FROM workspace_connections
+            WHERE workspace_id = $1
+            ORDER BY connected_at DESC
+        `,
+        [workspaceId],
+    );
+
+    return result.rows;
+}
+
+export async function getWorkspaceConnectionMap(workspaceId: string): Promise<Record<string, Record<string, unknown>>> {
+    const connections = await listWorkspaceConnections(workspaceId);
+    return connections.reduce<Record<string, Record<string, unknown>>>((accumulator, connection) => {
+        accumulator[connection.provider] = connection.config;
+        return accumulator;
+    }, {});
 }
 
 export type EventChunkInput = {
@@ -267,6 +428,19 @@ export async function getSourceStats(userId = "demo-user"): Promise<SourceStat[]
         `, [userId]);
 
     return result.rows;
+}
+
+export async function getWorkspaceReadiness(workspaceId: string): Promise<Record<string, boolean>> {
+    const connections = await listWorkspaceConnections(workspaceId);
+    const providers = new Set(connections.map((connection) => connection.provider));
+
+    return {
+        slack: providers.has("slack") || Boolean(env.SLACK_BOT_TOKEN),
+        github: providers.has("github") || Boolean(env.GITHUB_TOKEN),
+        gmail: providers.has("gmail") || Boolean(env.GMAIL_CLIENT_ID && env.GMAIL_CLIENT_SECRET && env.GMAIL_REFRESH_TOKEN),
+        support: providers.has("support") || Boolean(env.ZENDESK_SUBDOMAIN && env.ZENDESK_API_KEY),
+        meetings: providers.has("meeting") || Boolean(env.MEETING_INGESTION_SECRET),
+    };
 }
 
 export async function getCorpusStats(): Promise<{
