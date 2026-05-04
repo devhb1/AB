@@ -2,8 +2,8 @@ import { z } from "zod";
 
 const envSchema = z.object({
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-    OPENAI_API_KEY: z.string().min(1),
-    DATABASE_URL: z.string().min(1),
+    OPENAI_API_KEY: z.string().min(1).optional(),
+    DATABASE_URL: z.string().min(1).optional(),
     SLACK_BOT_TOKEN: z.string().optional(),
     SLACK_CHANNEL_IDS: z.string().optional(),
     GITHUB_TOKEN: z.string().optional(),

@@ -109,12 +109,13 @@ export function Dashboard() {
                     setMessage(`❌ Failed to create account: ${errorData.error || "Unknown error"}`); return;
                 }
 
-                const data = (await response.json()) as ApiResult & { account?: { id: string } };
+                const data = (await response.json()) as ApiResult & { account?: { id: string }; note?: string };
                 if (data.ok && data.account) {
                     const accId = data.account.id;
                     setAccountId(accId);
                     window.localStorage.setItem(ACCOUNT_KEY, accId);
-                    setMessage("✅ Account created successfully");
+                    const modeInfo = data.note ? ` (${data.note})` : "";
+                    setMessage(`✅ Account created successfully${modeInfo}`);
                 } else {
                     setMessage(`❌ Account creation returned no data: ${JSON.stringify(data)}`);
                 }

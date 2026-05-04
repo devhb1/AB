@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { createAccount } from "@/lib/db";
+import { env } from "@/lib/config";
 
 const accountSchema = z.object({
     name: z.string().min(2),
@@ -26,8 +26,28 @@ export async function POST(request: NextRequest) {
         }
 
         const input = result.data;
+        const accountId = crypto.randomUUID();
+
+        // Check if database is configured
+        if (!env.DATABASE_URL) {
+            console.warn("DATABASE_URL not configured - creating account without persistence for MVP");
+            // For MVP: create a mock account without DB persistence
+            return NextResponse.json({ 
+                ok: true, 
+                account: {
+                    id: accountId,
+                    name: input.name,
+                    email: input.email,
+                    created_at: new Date().toISOString()
+                },
+                note: "Account created (database not configured - data not persisted)"
+            });
+        }
+
+        // Database is available, create account in DB
+        const { createAccount } = await import("@/lib/db");
         const account = await createAccount({
-            id: crypto.randomUUID(),
+            id: accountId,
             name: input.name,
             email: input.email,
         });
