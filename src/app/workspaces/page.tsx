@@ -19,6 +19,11 @@ type ApiResult = {
     [key: string]: unknown;
 };
 
+const ACCOUNT_KEY = "decision-engine-account-id";
+const WORKSPACE_KEY = "decision-engine-workspace-id";
+const WORKSPACE_NAME_KEY = "decision-engine-workspace-name";
+const LEGACY_ACCOUNT_KEY = "ahb26-account-id";
+
 export default function WorkspacesPage() {
     const { isLoaded, isSignedIn } = useUser();
     const [accountId, setAccountId] = useState("");
@@ -35,9 +40,16 @@ export default function WorkspacesPage() {
             return;
         }
 
-        const storedAccountId = window.localStorage.getItem("decision-engine-account-id") ?? "";
+        const storedAccountId =
+            window.localStorage.getItem(ACCOUNT_KEY) ||
+            window.localStorage.getItem(LEGACY_ACCOUNT_KEY) ||
+            "";
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setAccountId(storedAccountId);
+
+        if (storedAccountId) {
+            window.localStorage.setItem(ACCOUNT_KEY, storedAccountId);
+        }
 
         if (!storedAccountId) {
             setError("No account found. Please create an account first.");
@@ -94,8 +106,8 @@ export default function WorkspacesPage() {
                 setNewWorkspaceName("");
                 setNewWorkspaceSlug("");
                 setNewWorkspaceDesc("");
-                window.localStorage.setItem("decision-engine-workspace-id", newWorkspace.id);
-                window.localStorage.setItem("decision-engine-workspace-name", newWorkspace.name);
+                window.localStorage.setItem(WORKSPACE_KEY, newWorkspace.id);
+                window.localStorage.setItem(WORKSPACE_NAME_KEY, newWorkspace.name);
             } else {
                 setError(data.error as string || "Failed to create workspace");
             }

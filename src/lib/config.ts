@@ -36,4 +36,4 @@ export const defaultSlackChannels = env.SLACK_CHANNEL_IDS
     ? env.SLACK_CHANNEL_IDS.split(",").map((item) => item.trim()).filter(Boolean)
     : [];
 
-export const companyName = env.COMPANY_NAME ?? "Decision Engine";
+export const companyName = env.COMPANY_NAME ?? "AHB26";

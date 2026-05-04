@@ -35,7 +35,7 @@ export function WorkspaceHeader({
             <div className="mx-auto max-w-6xl px-6 py-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <h1 className="text-lg font-semibold text-slate-900">Decision Engine</h1>
+                        <h1 className="text-lg font-semibold text-slate-900">AHB26</h1>
                         {currentWorkspace && (
                             <div className="relative">
                                 <button

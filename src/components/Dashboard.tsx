@@ -26,6 +26,11 @@ type DashboardStats = {
     };
 };
 
+const ACCOUNT_KEY = "decision-engine-account-id";
+const WORKSPACE_KEY = "decision-engine-workspace-id";
+const LEGACY_ACCOUNT_KEY = "ahb26-account-id";
+const LEGACY_WORKSPACE_KEY = "ahb26-workspace-id";
+
 export function Dashboard() {
     const { user } = useUser();
     const [accountId, setAccountId] = useState("");
@@ -59,13 +64,19 @@ export function Dashboard() {
     // Initialize from localStorage or create account
     useEffect(() => {
         const initializeAccount = async () => {
-            const storedAccountId = window.localStorage.getItem("ahb26-account-id");
+            const storedAccountId =
+                window.localStorage.getItem(ACCOUNT_KEY) ||
+                window.localStorage.getItem(LEGACY_ACCOUNT_KEY);
 
             if (storedAccountId) {
                 setAccountId(storedAccountId);
-                const storedWorkspaceId = window.localStorage.getItem("ahb26-workspace-id");
+                window.localStorage.setItem(ACCOUNT_KEY, storedAccountId);
+                const storedWorkspaceId =
+                    window.localStorage.getItem(WORKSPACE_KEY) ||
+                    window.localStorage.getItem(LEGACY_WORKSPACE_KEY);
                 if (storedWorkspaceId) {
                     setWorkspaceId(storedWorkspaceId);
+                    window.localStorage.setItem(WORKSPACE_KEY, storedWorkspaceId);
                     loadStats(storedWorkspaceId);
                 }
             } else if (user?.id) {
@@ -85,7 +96,7 @@ export function Dashboard() {
                 if (data.ok && data.account) {
                     const accId = data.account.id;
                     setAccountId(accId);
-                    window.localStorage.setItem("ahb26-account-id", accId);
+                    window.localStorage.setItem(ACCOUNT_KEY, accId);
                 }
             }
         };
@@ -119,7 +130,7 @@ export function Dashboard() {
                 const wsId = data.workspace.id;
                 setWorkspaceId(wsId);
                 setWorkspaceName(wsId);
-                window.localStorage.setItem("ahb26-workspace-id", wsId);
+                window.localStorage.setItem(WORKSPACE_KEY, wsId);
                 setMessage("✅ Workspace created");
                 await loadStats(wsId);
             } else {

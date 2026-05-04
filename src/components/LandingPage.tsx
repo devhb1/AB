@@ -3,184 +3,143 @@
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 
-const featureCards = [
-    {
-        title: "Autonomous ingestion",
-        description: "Zero manual entry. We live in your stack.",
-    },
-    {
-        title: "Decision attribution",
-        description: "Know who said what, where, and why instantly.",
-    },
-    {
-        title: "Context-aware search",
-        description: "Search code by intent, not keywords.",
-    },
-    {
-        title: "Security-first",
-        description: "PII redaction before vector storage, with self-hosted and SOC2-ready paths.",
-    },
-];
-
-function TimelineNode({
-    label,
-    title,
-    detail,
-    accent,
-}: {
-    label: string;
-    title: string;
-    detail: string;
-    accent: string;
-}) {
-    return (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-white shadow-lg shadow-black/20">
-            <p className={`text-[0.65rem] uppercase tracking-[0.28em] ${accent}`}>{label}</p>
-            <p className="mt-2 text-lg font-semibold">{title}</p>
-            <p className="mt-2 text-sm leading-6 text-slate-300">{detail}</p>
-        </div>
-    );
-}
-
 export function LandingPage() {
     const { isSignedIn } = useUser();
 
     return (
-        <section className="mb-8 overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-2xl shadow-slate-300/40">
-            <div className="grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
-                <div className="border-b border-slate-200/70 p-8 lg:border-b-0 lg:border-r lg:p-10">
-                    <p className="text-sm uppercase tracking-[0.4em] text-orange-700">YC War Room</p>
-                    <h1 className="mt-4 max-w-3xl text-5xl font-semibold tracking-tight text-slate-950 md:text-6xl">
-                        Your Company&apos;s Brain, Deciphered.
-                    </h1>
-                    <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
-                        Engineering moves fast. Documentation moves slow. Context dies in Slack.
-                        Decision Engine turns Slack, GitHub, Gmail, and support threads into a living
-                        decision graph.
-                    </p>
+        <main className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+            <header className="sticky top-0 z-50 border-b border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
+                <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+                    <div className="flex items-center gap-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-400 to-cyan-400">
+                            <span className="text-sm font-bold text-slate-900">26</span>
+                        </div>
+                        <span className="text-xl font-bold text-white">AHB26</span>
+                    </div>
 
-                    {!isSignedIn && (
-                        <div className="mt-8 flex flex-wrap gap-3">
+                    {!isSignedIn ? (
+                        <div className="flex gap-3">
+                            <Link
+                                href="/sign-in"
+                                className="px-4 py-2 text-sm font-semibold text-slate-300 transition hover:text-white"
+                            >
+                                Sign in
+                            </Link>
                             <Link
                                 href="/sign-up"
-                                className="rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
+                                className="rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-white transition hover:shadow-lg hover:shadow-cyan-500/50"
+                            >
+                                Get Started Free
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="flex gap-3">
+                            <Link
+                                href="/"
+                                className="px-4 py-2 text-sm font-semibold text-slate-300 transition hover:text-white"
+                            >
+                                Open Dashboard
+                            </Link>
+                            <Link
+                                href="/workspaces"
+                                className="rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-white transition hover:shadow-lg hover:shadow-cyan-500/50"
+                            >
+                                Create Workspace
+                            </Link>
+                        </div>
+                    )}
+                </div>
+            </header>
+
+            <section className="mx-auto max-w-6xl px-6 py-20 md:py-32">
+                <div className="mx-auto max-w-3xl text-center">
+                    <div className="mb-6 inline-block rounded-full border border-slate-700 bg-slate-800 px-4 py-2">
+                        <span className="text-sm font-medium text-cyan-400">The AI Context Engine</span>
+                    </div>
+
+                    <h1 className="mb-6 text-5xl font-bold leading-tight text-white md:text-6xl">
+                        Your Team&apos;s Memory Unified
+                    </h1>
+
+                    <p className="mb-8 text-xl leading-relaxed text-slate-300">
+                        AHB26 stores all your company context from Slack, GitHub, Gmail, and meetings.
+                        Your AI assistant reasons over this unified context to help you make better decisions faster.
+                    </p>
+
+                    {!isSignedIn ? (
+                        <div className="flex flex-col justify-center gap-4 sm:flex-row">
+                            <Link
+                                href="/sign-up"
+                                className="rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-8 py-4 text-lg font-semibold text-white transition hover:shadow-lg hover:shadow-cyan-500/50"
                             >
                                 Sign up
                             </Link>
                             <Link
                                 href="/sign-in"
-                                className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                                className="rounded-lg border border-cyan-500 px-8 py-4 text-lg font-semibold text-cyan-400 transition hover:bg-cyan-500/10"
                             >
                                 Log in
                             </Link>
                         </div>
-                    )}
-
-                    {isSignedIn && (
-                        <div className="mt-8 flex flex-wrap gap-3">
+                    ) : (
+                        <div className="flex flex-col justify-center gap-4 sm:flex-row">
                             <Link
                                 href="/workspaces"
-                                className="rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
+                                className="rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-8 py-4 text-lg font-semibold text-white transition hover:shadow-lg hover:shadow-cyan-500/50"
                             >
                                 Create workspace
                             </Link>
                             <Link
                                 href="/"
-                                className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                                className="rounded-lg border border-cyan-500 px-8 py-4 text-lg font-semibold text-cyan-400 transition hover:bg-cyan-500/10"
                             >
-                                Open dashboard
+                                Go to dashboard
                             </Link>
                         </div>
                     )}
+                </div>
+            </section>
 
-                    <div className="mt-8 flex flex-wrap gap-3">
-                        <span className="rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white">
-                            Sync your company in 60 seconds
-                        </span>
-                        <span className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700">
-                            Printable decision memos
-                        </span>
-                        <span className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700">
-                            PII redaction before vector storage
-                        </span>
-                    </div>
-
-                    <div className="mt-10 grid gap-4 md:grid-cols-2">
-                        {featureCards.map((card) => (
-                            <div key={card.title} className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                                <p className="text-sm font-semibold text-slate-950">{card.title}</p>
-                                <p className="mt-2 text-sm leading-6 text-slate-600">{card.description}</p>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="mt-10 rounded-3xl border border-slate-200 bg-slate-950 p-5 text-white">
-                        <p className="text-sm uppercase tracking-[0.28em] text-cyan-300">The problem</p>
-                        <p className="mt-3 max-w-2xl text-lg leading-8 text-slate-200">
-                            We solve knowledge debt: the loss of context when teams move fast and nobody can
-                            remember why the last deployment failed.
+            <section className="mx-auto max-w-6xl px-6 py-16 md:py-24">
+                <div className="grid items-center gap-12 md:grid-cols-2">
+                    <div>
+                        <h2 className="mb-6 text-4xl font-bold text-white md:text-5xl">About Us</h2>
+                        <p className="mb-4 text-lg text-slate-300">
+                            AHB26 is a unified context platform built for fast-moving teams. We solve a critical
+                            problem in modern companies: context loss.
+                        </p>
+                        <p className="text-lg text-slate-300">
+                            When your team communicates across Slack, GitHub, Gmail, and meetings, critical decisions
+                            and their reasoning get scattered. AHB26 brings it all together.
                         </p>
                     </div>
-
-                    <div className="mt-8 rounded-3xl border border-slate-200 bg-slate-50 p-6">
-                        <p className="text-sm uppercase tracking-[0.3em] text-slate-500">About us</p>
-                        <h2 className="mt-3 text-2xl font-semibold text-slate-900">Built by operators for fast teams</h2>
-                        <p className="mt-3 text-sm leading-7 text-slate-700">
-                            We started this product after repeatedly seeing teams lose critical decision context during
-                            handovers, incidents, and scaling. Our mission is simple: preserve the why behind every
-                            important decision so new and existing team members can move faster with confidence.
-                        </p>
-                        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                                <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Mission</p>
-                                <p className="mt-2 text-sm font-medium text-slate-900">Keep company memory searchable and explainable.</p>
+                    <div className="rounded-2xl border border-slate-700 bg-slate-800/50 p-8">
+                        <div className="space-y-4">
+                            <div className="flex gap-4">
+                                <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-cyan-400" />
+                                <div>
+                                    <p className="font-semibold text-white">Unified Data Lake</p>
+                                    <p className="text-sm text-slate-400">All context in one place</p>
+                                </div>
                             </div>
-                            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                                <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Approach</p>
-                                <p className="mt-2 text-sm font-medium text-slate-900">Connect sources, build timelines, generate decision memos.</p>
+                            <div className="flex gap-4">
+                                <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-cyan-400" />
+                                <div>
+                                    <p className="font-semibold text-white">AI-Powered Reasoning</p>
+                                    <p className="text-sm text-slate-400">Understand why decisions were made</p>
+                                </div>
                             </div>
-                            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                                <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Outcome</p>
-                                <p className="mt-2 text-sm font-medium text-slate-900">Faster onboarding, cleaner execution, fewer repeated mistakes.</p>
+                            <div className="flex gap-4">
+                                <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-cyan-400" />
+                                <div>
+                                    <p className="font-semibold text-white">Secure and Private</p>
+                                    <p className="text-sm text-slate-400">Your data, your control</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div className="bg-slate-950 p-8 lg:p-10">
-                    <p className="text-sm uppercase tracking-[0.35em] text-cyan-300">Visual timeline</p>
-                    <div className="mt-6 space-y-4">
-                        <TimelineNode
-                            label="Gmail"
-                            title="Client request lands"
-                            detail="A customer email asks for a rollout change and flags a billing mismatch."
-                            accent="text-cyan-300"
-                        />
-                        <div className="ml-6 h-10 w-px bg-gradient-to-b from-cyan-300 to-slate-700" />
-                        <TimelineNode
-                            label="Slack"
-                            title="Team aligns in #dev-core"
-                            detail="The CTO and engineering lead discuss the tradeoff and agree on a safer rollout path."
-                            accent="text-orange-300"
-                        />
-                        <div className="ml-6 h-10 w-px bg-gradient-to-b from-orange-300 to-slate-700" />
-                        <TimelineNode
-                            label="GitHub"
-                            title="PR lands with reasoning trace"
-                            detail="A follow-up commit is linked to the email and Slack thread, so the Why is preserved forever."
-                            accent="text-emerald-300"
-                        />
-                    </div>
-
-                    <div className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-5 text-sm text-slate-300">
-                        <p className="font-semibold text-white">Security and privacy</p>
-                        <p className="mt-2 leading-7">
-                            Self-hosted options and SOC2-ready data isolation. Sensitive data is redacted before
-                            it reaches the vector database.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
+            </section>
+        </main>
     );
 }
