@@ -96,6 +96,11 @@ async function getJson(url: string): Promise<ApiResult> {
 function HomeContent() {
   const { isLoaded, isSignedIn } = useUser();
   const searchParams = useSearchParams();
+
+  // Initialize state from localStorage
+  const [demoMode] = useState(() =>
+    typeof window !== "undefined" && window.localStorage.getItem("decision-engine-demo-mode") === "true"
+  );
   const [accountName, setAccountName] = useState("Harshit");
   const [accountEmail, setAccountEmail] = useState("harshit@example.com");
   const [accountId, setAccountId] = useState("");
@@ -133,6 +138,7 @@ function HomeContent() {
   const [loadingManual, setLoadingManual] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     const storedAccountId = window.localStorage.getItem("decision-engine-account-id") ?? "";
     const storedAccountName = window.localStorage.getItem("decision-engine-account-name") ?? "";
     const storedAccountEmail = window.localStorage.getItem("decision-engine-account-email") ?? "";
@@ -279,7 +285,7 @@ function HomeContent() {
     return queryResult.memo;
   }, [queryResult]);
 
-  const showWorkspace = isLoaded && isSignedIn;
+  const showWorkspace = (isLoaded && isSignedIn) || demoMode;
 
   function handleWorkspaceChange(workspaceId: string) {
     window.localStorage.setItem("decision-engine-workspace-id", workspaceId);

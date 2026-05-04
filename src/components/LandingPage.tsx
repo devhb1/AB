@@ -1,4 +1,9 @@
+"use client";
+
+import { useState } from "react";
 import { SignInButton, SignUpButton } from "@clerk/nextjs";
+
+const clerkEnabled = typeof window !== "undefined" && Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
 const featureCards = [
     {
@@ -40,6 +45,14 @@ function TimelineNode({
 }
 
 export function LandingPage() {
+    const [clicked, setClicked] = useState(false);
+
+    const handleDemoMode = () => {
+        setClicked(true);
+        window.localStorage.setItem("decision-engine-demo-mode", "true");
+        setTimeout(() => window.location.reload(), 100);
+    };
+
     return (
         <section className="mb-8 overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-2xl shadow-slate-300/40">
             <div className="grid gap-0 lg:grid-cols-[1.15fr_0.85fr]">
@@ -55,16 +68,36 @@ export function LandingPage() {
                     </p>
 
                     <div className="mt-8 flex flex-wrap gap-3">
-                        <SignUpButton mode="modal" fallbackRedirectUrl="/">
-                            <button className="rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500">
-                                Get started
-                            </button>
-                        </SignUpButton>
-                        <SignInButton mode="modal" fallbackRedirectUrl="/">
-                            <button className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
-                                Log in
-                            </button>
-                        </SignInButton>
+                        {clerkEnabled ? (
+                            <>
+                                <SignUpButton mode="modal" fallbackRedirectUrl="/">
+                                    <button className="rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500">
+                                        Get started
+                                    </button>
+                                </SignUpButton>
+                                <SignInButton mode="modal" fallbackRedirectUrl="/">
+                                    <button className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                                        Log in
+                                    </button>
+                                </SignInButton>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={handleDemoMode}
+                                    disabled={clicked}
+                                    className="rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:opacity-60"
+                                >
+                                    {clicked ? "Launching..." : "Get started (Demo)"}
+                                </button>
+                                <a
+                                    href="#setup"
+                                    className="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 inline-block"
+                                >
+                                    Setup Clerk
+                                </a>
+                            </>
+                        )}
                     </div>
 
                     <div className="mt-8 flex flex-wrap gap-3">
