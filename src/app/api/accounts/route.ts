@@ -32,8 +32,8 @@ export async function POST(request: NextRequest) {
         if (!env.DATABASE_URL) {
             console.warn("DATABASE_URL not configured - creating account without persistence for MVP");
             // For MVP: create a mock account without DB persistence
-            return NextResponse.json({ 
-                ok: true, 
+            return NextResponse.json({
+                ok: true,
                 account: {
                     id: accountId,
                     name: input.name,
