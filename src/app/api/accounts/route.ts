@@ -28,31 +28,31 @@ export async function POST(request: NextRequest) {
         const input = result.data;
         const accountId = crypto.randomUUID();
 
-        // Check if database is configured
-        if (!env.DATABASE_URL) {
-            console.warn("DATABASE_URL not configured - creating account without persistence for MVP");
-            // For MVP: create a mock account without DB persistence
-            return NextResponse.json({
-                ok: true,
-                account: {
+        if (env.DATABASE_URL) {
+            try {
+                const { createAccount } = await import("@/lib/db");
+                const account = await createAccount({
                     id: accountId,
                     name: input.name,
                     email: input.email,
-                    created_at: new Date().toISOString()
-                },
-                note: "Account created (database not configured - data not persisted)"
-            });
+                });
+
+                return NextResponse.json({ ok: true, account });
+            } catch (dbError) {
+                console.warn("DATABASE_URL is set but unavailable, falling back to MVP account creation:", dbError);
+            }
         }
 
-        // Database is available, create account in DB
-        const { createAccount } = await import("@/lib/db");
-        const account = await createAccount({
-            id: accountId,
-            name: input.name,
-            email: input.email,
+        return NextResponse.json({
+            ok: true,
+            account: {
+                id: accountId,
+                name: input.name,
+                email: input.email,
+                created_at: new Date().toISOString(),
+            },
+            note: "Account created in MVP mode (database unavailable)",
         });
-
-        return NextResponse.json({ ok: true, account });
     } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";
         console.error("Account creation error:", error);

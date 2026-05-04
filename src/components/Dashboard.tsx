@@ -33,6 +33,7 @@ const WORKSPACE_KEY = "ahb26-workspace-id";
 export function Dashboard() {
     const { user } = useUser();
     const [accountId, setAccountId] = useState("");
+    const [isInitializingAccount, setIsInitializingAccount] = useState(true);
     const [workspaceName, setWorkspaceName] = useState("My Workspace");
     const [workspaceId, setWorkspaceId] = useState("");
     const [slackChannels, setSlackChannels] = useState("");
@@ -62,22 +63,29 @@ export function Dashboard() {
     // Initialize from localStorage or create account
     useEffect(() => {
         const initializeAccount = async () => {
-            const storedAccountId = window.localStorage.getItem(ACCOUNT_KEY);
+            try {
+                const storedAccountId = window.localStorage.getItem(ACCOUNT_KEY);
 
-            if (storedAccountId) {
-                setAccountId(storedAccountId);
-                const storedWorkspaceId = window.localStorage.getItem(WORKSPACE_KEY);
-                if (storedWorkspaceId) {
-                    setWorkspaceId(storedWorkspaceId);
-                    loadStats(storedWorkspaceId);
+                if (storedAccountId) {
+                    setAccountId(storedAccountId);
+                    const storedWorkspaceId = window.localStorage.getItem(WORKSPACE_KEY);
+                    if (storedWorkspaceId) {
+                        setWorkspaceId(storedWorkspaceId);
+                        loadStats(storedWorkspaceId);
+                    }
+                    return;
                 }
-            } else if (user?.id) {
+
+                if (!user?.id) {
+                    return;
+                }
+
                 // Create account for this user
                 const fullName = user.fullName || user.firstName || "Team User";
-                const email = user.primaryEmailAddress?.emailAddress;
+                const email = user.primaryEmailAddress?.emailAddress || user.emailAddresses?.[0]?.emailAddress;
 
                 if (!email) {
-                    setMessage("❌ Unable to access email address. Please ensure your email is verified in account settings.");
+                    setMessage("❌ Unable to access email address. Please ensure your email is verified in Clerk.");
                     return;
                 }
 
@@ -98,18 +106,18 @@ export function Dashboard() {
                     }),
                 });
 
+                const data = (await response.json()) as ApiResult & { account?: { id: string }; note?: string; error?: string };
+
                 if (!response.ok) {
-                    const errorData = (await response.json()) as { error?: string; details?: Record<string, unknown>; received?: Record<string, unknown> };
                     console.error("Account creation failed:", {
                         status: response.status,
-                        error: errorData.error,
-                        details: errorData.details,
-                        sent: { fullName, email }
+                        error: data.error,
+                        sent: { fullName, email },
                     });
-                    setMessage(`❌ Failed to create account: ${errorData.error || "Unknown error"}`); return;
+                    setMessage(`❌ Failed to create account: ${data.error || "Unknown error"}`);
+                    return;
                 }
 
-                const data = (await response.json()) as ApiResult & { account?: { id: string }; note?: string };
                 if (data.ok && data.account) {
                     const accId = data.account.id;
                     setAccountId(accId);
@@ -119,6 +127,8 @@ export function Dashboard() {
                 } else {
                     setMessage(`❌ Account creation returned no data: ${JSON.stringify(data)}`);
                 }
+            } finally {
+                setIsInitializingAccount(false);
             }
         };
 
@@ -128,7 +138,7 @@ export function Dashboard() {
 
     const createWorkspace = async () => {
         if (!accountId) {
-            setMessage("Error: Account not created yet");
+            setMessage("Error: Account is still initializing. Please wait a moment and try again.");
             return;
         }
         setLoadingWorkspace(true);
@@ -246,6 +256,12 @@ export function Dashboard() {
                     </div>
                 )}
 
+                {isInitializingAccount && !accountId && (
+                    <div className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--surface-muted)] p-4 shadow-sm">
+                        <p className="text-[var(--muted)]">Setting up your account...</p>
+                    </div>
+                )}
+
                 {/* Workspace Section */}
                 {!workspaceId ? (
                     <div className="max-w-3xl mx-auto">
@@ -265,7 +281,7 @@ export function Dashboard() {
                                 />
                                 <button
                                     onClick={() => void createWorkspace()}
-                                    disabled={loadingWorkspace}
+                                    disabled={loadingWorkspace || isInitializingAccount}
                                     className="w-full rounded-lg border border-[var(--primary)] bg-[var(--primary)] px-6 py-3 font-semibold text-[var(--primary-foreground)] hover:shadow-lg disabled:opacity-60"
                                 >
                                     {loadingWorkspace ? "Creating..." : "Create Workspace"}
