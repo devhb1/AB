@@ -181,18 +181,18 @@ export function Dashboard() {
     };
 
     return (
-        <main className="min-h-screen bg-[#f6f6f5]">
+        <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
             {/* Header */}
-            <header className="sticky top-0 z-50 border-b border-slate-200 bg-[#f6f6f5]/95 backdrop-blur-sm">
+            <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--background-elevated)] backdrop-blur-sm">
                 <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-black flex items-center justify-center shadow-sm">
-                            <span className="text-white font-bold text-sm">26</span>
+                        <div className="w-9 h-9 rounded-lg bg-[var(--primary)] flex items-center justify-center shadow-sm">
+                            <span className="text-[var(--primary-foreground)] font-bold text-sm">26</span>
                         </div>
-                        <span className="text-2xl font-extrabold text-black">AHB26</span>
+                        <span className="text-2xl font-extrabold text-[var(--foreground)]">AHB26</span>
                     </div>
                     <div className="flex items-center gap-4">
-                        <div className="text-sm text-slate-600">
+                        <div className="text-sm text-[var(--muted)]">
                             Welcome, {user?.firstName || "Team"}
                         </div>
                         <SignOutButton redirectUrl="/" />
@@ -204,8 +204,8 @@ export function Dashboard() {
             <div className="mx-auto max-w-6xl px-6 py-12">
                 {/* Status Message */}
                 {message && (
-                    <div className="mb-6 p-4 rounded-lg bg-slate-50 border border-slate-200">
-                        <p className="text-black">{message}</p>
+                    <div className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm">
+                        <p className="text-[var(--foreground)]">{message}</p>
                     </div>
                 )}
 
@@ -213,10 +213,10 @@ export function Dashboard() {
                 {!workspaceId ? (
                     <div className="max-w-3xl mx-auto">
                         <div className="relative rounded-3xl">
-                            <div className="absolute -inset-6 -z-10 rounded-3xl bg-white/60 blur-2xl"></div>
-                            <div className="rounded-3xl border border-slate-200 bg-white p-12 shadow-[0_60px_140px_rgba(2,6,23,0.14)]">
-                                <h2 className="text-2xl font-bold text-black mb-2">Create Your Workspace</h2>
-                                <p className="text-slate-600 mb-6">
+                            <div className="absolute -inset-6 -z-10 rounded-3xl bg-[var(--surface)] blur-2xl"></div>
+                            <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-12 shadow-[var(--shadow-strong)]">
+                                <h2 className="mb-2 text-2xl font-bold text-[var(--foreground)]">Create Your Workspace</h2>
+                                <p className="mb-6 text-[var(--muted)]">
                                     Set up a workspace to start syncing your team context from Slack, GitHub, and Gmail.
                                 </p>
                                 <input
@@ -224,12 +224,12 @@ export function Dashboard() {
                                     placeholder="Workspace name"
                                     value={workspaceName}
                                     onChange={(e) => setWorkspaceName(e.target.value)}
-                                    className="w-full px-4 py-3 rounded-lg bg-slate-50 text-black placeholder-slate-400 border border-slate-200 mb-4"
+                                    className="mb-4 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--muted)]"
                                 />
                                 <button
                                     onClick={() => void createWorkspace()}
                                     disabled={loadingWorkspace}
-                                    className="w-full px-6 py-3 rounded-lg bg-black text-white font-semibold hover:shadow-lg disabled:opacity-60"
+                                    className="w-full rounded-lg border border-[var(--primary)] bg-[var(--primary)] px-6 py-3 font-semibold text-[var(--primary-foreground)] hover:shadow-lg disabled:opacity-60"
                                 >
                                     {loadingWorkspace ? "Creating..." : "Create Workspace"}
                                 </button>
@@ -239,18 +239,18 @@ export function Dashboard() {
                 ) : (
                     <>
                         {/* Workspace Info */}
-                        <div className="mb-12 rounded-2xl border border-slate-200 bg-white p-8 shadow-md ring-1 ring-slate-100">
-                            <h2 className="text-2xl font-bold text-black mb-6">Workspace</h2>
+                        <div className="mb-12 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm ring-1 ring-[var(--surface)]">
+                            <h2 className="mb-6 text-2xl font-bold text-[var(--foreground)]">Workspace</h2>
                             <div className="space-y-3">
-                                <p className="text-slate-600">
-                                    <span className="font-semibold text-black">Name:</span> {workspaceName}
+                                <p className="text-[var(--muted)]">
+                                    <span className="font-semibold text-[var(--foreground)]">Name:</span> {workspaceName}
                                 </p>
-                                <p className="text-slate-600">
-                                    <span className="font-semibold text-black">ID:</span> {workspaceId}
+                                <p className="text-[var(--muted)]">
+                                    <span className="font-semibold text-[var(--foreground)]">ID:</span> {workspaceId}
                                 </p>
                                 {stats && (
-                                    <p className="text-slate-600">
-                                        <span className="font-semibold text-black">Events Stored:</span> {stats.corpus.totalChunks}
+                                    <p className="text-[var(--muted)]">
+                                        <span className="font-semibold text-[var(--foreground)]">Events Stored:</span> {stats.corpus.totalChunks}
                                     </p>
                                 )}
                             </div>
@@ -258,12 +258,12 @@ export function Dashboard() {
 
                         {/* Connect Sources */}
                         <div className="mb-12">
-                            <h2 className="text-2xl font-bold text-black mb-6">Connect Your Sources</h2>
+                            <h2 className="mb-6 text-2xl font-bold text-[var(--foreground)]">Connect Your Sources</h2>
                             <div className="grid md:grid-cols-3 gap-6">
                                 {/* Slack */}
-                                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md ring-1 ring-slate-100">
-                                    <h3 className="text-lg font-semibold text-black mb-2">Slack</h3>
-                                    <p className="text-sm text-slate-600 mb-4">
+                                <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm ring-1 ring-[var(--surface)]">
+                                    <h3 className="mb-2 text-lg font-semibold text-[var(--foreground)]">Slack</h3>
+                                    <p className="mb-4 text-sm text-[var(--muted)]">
                                         Sync your Slack channel history and discussions.
                                     </p>
                                     <input
@@ -271,21 +271,21 @@ export function Dashboard() {
                                         placeholder="Channel IDs (comma-separated)"
                                         value={slackChannels}
                                         onChange={(e) => setSlackChannels(e.target.value)}
-                                        className="w-full px-3 py-2 rounded-lg bg-slate-50 text-black placeholder-slate-400 border border-slate-200 text-sm mb-4"
+                                        className="mb-4 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)]"
                                     />
                                     <button
                                         onClick={() => void connectProvider("slack")}
                                         disabled={loadingSlack || !slackChannels}
-                                        className="w-full px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-black font-semibold disabled:opacity-60"
+                                        className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2 font-semibold text-[var(--foreground)] hover:border-[var(--foreground)] disabled:opacity-60"
                                     >
                                         {loadingSlack ? "Connecting..." : "Connect Slack"}
                                     </button>
                                 </div>
 
                                 {/* GitHub */}
-                                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md ring-1 ring-slate-100">
-                                    <h3 className="text-lg font-semibold text-black mb-2">GitHub</h3>
-                                    <p className="text-sm text-slate-600 mb-4">
+                                <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm ring-1 ring-[var(--surface)]">
+                                    <h3 className="mb-2 text-lg font-semibold text-[var(--foreground)]">GitHub</h3>
+                                    <p className="mb-4 text-sm text-[var(--muted)]">
                                         Sync commits, PRs, and issues from your repos.
                                     </p>
                                     <input
@@ -293,28 +293,28 @@ export function Dashboard() {
                                         placeholder="Owner"
                                         value={githubOwner}
                                         onChange={(e) => setGithubOwner(e.target.value)}
-                                        className="w-full px-3 py-2 rounded-lg bg-slate-50 text-black placeholder-slate-400 border border-slate-200 text-sm mb-2"
+                                        className="mb-2 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)]"
                                     />
                                     <input
                                         type="text"
                                         placeholder="Repository"
                                         value={githubRepo}
                                         onChange={(e) => setGithubRepo(e.target.value)}
-                                        className="w-full px-3 py-2 rounded-lg bg-slate-50 text-black placeholder-slate-400 border border-slate-200 text-sm mb-4"
+                                        className="mb-4 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)]"
                                     />
                                     <button
                                         onClick={() => void connectProvider("github")}
                                         disabled={loadingGithub || !githubOwner || !githubRepo}
-                                        className="w-full px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-black font-semibold disabled:opacity-60"
+                                        className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2 font-semibold text-[var(--foreground)] hover:border-[var(--foreground)] disabled:opacity-60"
                                     >
                                         {loadingGithub ? "Connecting..." : "Connect GitHub"}
                                     </button>
                                 </div>
 
                                 {/* Gmail */}
-                                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md ring-1 ring-slate-100">
-                                    <h3 className="text-lg font-semibold text-black mb-2">Gmail</h3>
-                                    <p className="text-sm text-slate-600 mb-4">
+                                <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm ring-1 ring-[var(--surface)]">
+                                    <h3 className="mb-2 text-lg font-semibold text-[var(--foreground)]">Gmail</h3>
+                                    <p className="mb-4 text-sm text-[var(--muted)]">
                                         Sync important email threads and conversations.
                                     </p>
                                     <input
@@ -322,12 +322,12 @@ export function Dashboard() {
                                         placeholder="Search query"
                                         value={gmailQuery}
                                         onChange={(e) => setGmailQuery(e.target.value)}
-                                        className="w-full px-3 py-2 rounded-lg bg-slate-50 text-black placeholder-slate-400 border border-slate-200 text-sm mb-4"
+                                        className="mb-4 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)]"
                                     />
                                     <button
                                         onClick={() => void connectProvider("gmail")}
                                         disabled={loadingGmail || !gmailQuery}
-                                        className="w-full px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-black font-semibold disabled:opacity-60"
+                                        className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2 font-semibold text-[var(--foreground)] hover:border-[var(--foreground)] disabled:opacity-60"
                                     >
                                         {loadingGmail ? "Connecting..." : "Connect Gmail"}
                                     </button>
@@ -335,11 +335,11 @@ export function Dashboard() {
                             </div>
                         </div>
 
-                        <div className="rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 to-white p-8 shadow-md ring-1 ring-slate-100">
+                        <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm ring-1 ring-[var(--surface)]">
                             <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                                 <div>
-                                    <h2 className="text-2xl font-bold text-black">Sync your workspace</h2>
-                                    <p className="mt-2 text-slate-600">
+                                    <h2 className="text-2xl font-bold text-[var(--foreground)]">Sync your workspace</h2>
+                                    <p className="mt-2 text-[var(--muted)]">
                                         After connecting Slack, GitHub, and Gmail, start the initial sync to ingest context.
                                     </p>
                                 </div>
@@ -371,7 +371,7 @@ export function Dashboard() {
                                             });
                                     }}
                                     disabled={loadingSync || !workspaceId}
-                                    className="rounded-full border border-slate-900 bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-900/20 disabled:opacity-60"
+                                    className="rounded-full border border-[var(--primary)] bg-[var(--primary)] px-6 py-3 text-sm font-semibold text-[var(--primary-foreground)] transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-900/20 dark:hover:shadow-black/30 disabled:opacity-60"
                                 >
                                     {loadingSync ? "Syncing..." : "Start sync"}
                                 </button>
