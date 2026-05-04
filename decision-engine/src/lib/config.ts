@@ -1,0 +1,39 @@
+import { z } from "zod";
+
+const envSchema = z.object({
+    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+    OPENAI_API_KEY: z.string().min(1),
+    DATABASE_URL: z.string().min(1),
+    SLACK_BOT_TOKEN: z.string().optional(),
+    SLACK_CHANNEL_IDS: z.string().optional(),
+    GITHUB_TOKEN: z.string().optional(),
+    GITHUB_OWNER: z.string().optional(),
+    GITHUB_REPO: z.string().optional(),
+    GMAIL_CLIENT_ID: z.string().optional(),
+    GMAIL_CLIENT_SECRET: z.string().optional(),
+    GMAIL_REFRESH_TOKEN: z.string().optional(),
+    ZENDESK_SUBDOMAIN: z.string().optional(),
+    ZENDESK_API_KEY: z.string().optional(),
+    MEETING_INGESTION_SECRET: z.string().optional(),
+    INGESTION_SHARED_SECRET: z.string().optional(),
+    COMPANY_NAME: z.string().optional(),
+    PRIMARY_DOMAIN: z.string().optional(),
+});
+
+const parsed = envSchema.safeParse(process.env);
+
+if (!parsed.success) {
+    const lines = parsed.error.issues.map((issue) => {
+        const key = issue.path.join(".");
+        return `- ${key}: ${issue.message}`;
+    });
+    throw new Error(`Invalid environment configuration:\n${lines.join("\n")}`);
+}
+
+export const env = parsed.data;
+
+export const defaultSlackChannels = env.SLACK_CHANNEL_IDS
+    ? env.SLACK_CHANNEL_IDS.split(",").map((item) => item.trim()).filter(Boolean)
+    : [];
+
+export const companyName = env.COMPANY_NAME ?? "Decision Engine";
