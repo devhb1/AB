@@ -252,6 +252,27 @@ export function Dashboard() {
                         }
                         : { query: gmailQuery.trim() || "newer_than:30d" };
 
+            // First, validate the credentials with the provider
+            setMessage(`🔄 Validating ${provider} credentials...`);
+            const validateResponse = await fetch("/api/connectors/validate", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    provider,
+                    config,
+                }),
+            });
+
+            const validateData = await readJsonResponse<ApiResult>(validateResponse);
+            if (!validateData.ok) {
+                const errorMsg = validateData.error || "Validation failed. Ensure your provider credentials are set in Vercel environment variables.";
+                setMessage(`❌ ${errorMsg}`);
+                return;
+            }
+
+            // Credentials are valid, now store the connection
             const response = await fetch(`/api/workspaces/${encodeURIComponent(workspaceId)}/connections`, {
                 method: "POST",
                 headers: {
@@ -266,11 +287,11 @@ export function Dashboard() {
             });
             const data = await readJsonResponse<ApiResult>(response);
             if (data.ok) {
-                setMessage(`✅ ${provider} connected`);
+                setMessage(`✅ ${validateData.message || provider + " connected"}`);
                 closeConnectionWindow();
                 await loadStats(workspaceId);
             } else {
-                setMessage(`❌ Failed to connect ${provider}`);
+                setMessage(`❌ Failed to store connection`);
             }
         } catch (err) {
             setMessage(`Error: ${err instanceof Error ? err.message : "Unknown error"}`);
