@@ -30,6 +30,20 @@ type DashboardStats = {
 const ACCOUNT_KEY = "ahb26-account-id";
 const WORKSPACE_KEY = "ahb26-workspace-id";
 
+async function readJsonResponse<T>(response: Response): Promise<T> {
+    const text = await response.text();
+
+    if (!text) {
+        throw new Error(`Empty response body (${response.status})`);
+    }
+
+    try {
+        return JSON.parse(text) as T;
+    } catch {
+        throw new Error(`Invalid JSON response (${response.status}): ${text.slice(0, 200)}`);
+    }
+}
+
 export function Dashboard() {
     const { user } = useUser();
     const [accountId, setAccountId] = useState("");
@@ -51,7 +65,13 @@ export function Dashboard() {
     const loadStats = async (wsId: string) => {
         try {
             const response = await fetch(`/api/stats?workspaceId=${encodeURIComponent(wsId)}`);
-            const data = (await response.json()) as DashboardStats & { ok?: boolean };
+            if (!response.ok) {
+                const body = await response.text();
+                console.error("Stats request failed:", response.status, body);
+                return;
+            }
+
+            const data = await readJsonResponse<DashboardStats & { ok?: boolean }>(response);
             if (data?.companyName) {
                 setStats(data);
             }
@@ -106,7 +126,7 @@ export function Dashboard() {
                     }),
                 });
 
-                const data = (await response.json()) as ApiResult & { account?: { id: string }; note?: string; error?: string };
+                const data = await readJsonResponse<ApiResult & { account?: { id: string }; note?: string; error?: string }>(response);
 
                 if (!response.ok) {
                     console.error("Account creation failed:", {
@@ -156,7 +176,7 @@ export function Dashboard() {
                     description: "Team context workspace",
                 }),
             });
-            const data = (await response.json()) as ApiResult & { workspace?: WorkspaceRecord };
+            const data = await readJsonResponse<ApiResult & { workspace?: WorkspaceRecord }>(response);
             if (data.ok && data.workspace) {
                 const wsId = data.workspace.id;
                 setWorkspaceId(wsId);
@@ -206,7 +226,7 @@ export function Dashboard() {
                     status: "connected",
                 }),
             });
-            const data = (await response.json()) as ApiResult;
+            const data = await readJsonResponse<ApiResult>(response);
             if (data.ok) {
                 setMessage(`✅ ${provider} connected`);
                 await loadStats(workspaceId);
@@ -407,7 +427,7 @@ export function Dashboard() {
                                             },
                                             body: JSON.stringify({ workspaceId }),
                                         })
-                                            .then(async (response) => (await response.json()) as ApiResult)
+                                            .then(async (response) => readJsonResponse<ApiResult>(response))
                                             .then((data) => {
                                                 if (data.ok) {
                                                     setMessage("✅ Sync completed. Your context is being processed...");

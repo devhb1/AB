@@ -25,10 +25,15 @@ export async function getWorkspaceOrDemoDefault(workspaceId?: string): Promise<s
         return id;
     }
 
-    // For real workspaces, verify they exist in the DB
-    const db = getDbPool();
-    const result = await db.query("SELECT id FROM workspaces WHERE id = $1 LIMIT 1", [id]);
-    return result.rows.length > 0 ? id : "demo-user";
+    try {
+        // For real workspaces, verify they exist in the DB when available.
+        const db = getDbPool();
+        const result = await db.query("SELECT id FROM workspaces WHERE id = $1 LIMIT 1", [id]);
+        return result.rows.length > 0 ? id : "demo-user";
+    } catch (error) {
+        console.warn("Workspace lookup unavailable, using requested workspace in MVP mode:", error);
+        return id;
+    }
 }
 
 export async function ensureSchema(): Promise<void> {
