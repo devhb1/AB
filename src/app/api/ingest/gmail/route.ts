@@ -10,6 +10,9 @@ export async function POST(request: NextRequest) {
         const records = await ingestGmailEvents({
             query: body.query,
             maxResults: body.maxResults,
+            clientId: body.clientId,
+            clientSecret: body.clientSecret,
+            refreshToken: body.refreshToken,
         });
         const ingested = await ingestRecords("gmail", records);
 

@@ -15,8 +15,10 @@ export async function ingestGithubEvents(params?: {
     owner?: string;
     repo?: string;
     perPage?: number;
+    token?: string;
 }): Promise<GithubEventRecord[]> {
-    if (!env.GITHUB_TOKEN) {
+    const token = params?.token || env.GITHUB_TOKEN;
+    if (!token) {
         return [];
     }
 
@@ -25,8 +27,7 @@ export async function ingestGithubEvents(params?: {
     if (!owner || !repo) {
         return [];
     }
-
-    const octokit = new Octokit({ auth: env.GITHUB_TOKEN });
+    const octokit = new Octokit({ auth: token });
     const perPage = Math.min(params?.perPage ?? 30, 100);
 
     const [commits, pulls, issues] = await Promise.all([

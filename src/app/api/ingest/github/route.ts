@@ -11,6 +11,7 @@ export async function POST(request: NextRequest) {
             owner: body.owner,
             repo: body.repo,
             perPage: body.perPage,
+            token: body.token,
         });
         const ingested = await ingestRecords("github", records);
 

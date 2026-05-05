@@ -13,9 +13,9 @@ export async function POST(request: NextRequest) {
         const userId = request.headers.get("x-user-id") ?? body.userId ?? "demo-user";
 
         const [slack, github, gmail] = await Promise.all([
-            ingestSlackEvents({ channelIds: body.channelIds, limit: body.slackLimit }),
-            ingestGithubEvents({ owner: body.owner, repo: body.repo, perPage: body.githubPerPage }),
-            ingestGmailEvents({ query: body.gmailQuery, maxResults: body.gmailMaxResults }),
+            ingestSlackEvents({ channelIds: body.channelIds, limit: body.slackLimit, token: body.slackToken }),
+            ingestGithubEvents({ owner: body.owner, repo: body.repo, perPage: body.githubPerPage, token: body.githubToken }),
+            ingestGmailEvents({ query: body.gmailQuery, maxResults: body.gmailMaxResults, clientId: body.gmailClientId, clientSecret: body.gmailClientSecret, refreshToken: body.gmailRefreshToken }),
         ]);
 
         const [slackSummary, githubSummary, gmailSummary] = await Promise.all([

@@ -39,25 +39,24 @@ function extractPlainBody(payload?: {
 export async function ingestGmailEvents(params?: {
     query?: string;
     maxResults?: number;
+    clientId?: string;
+    clientSecret?: string;
+    refreshToken?: string;
 }): Promise<GmailEventRecord[]> {
-    if (!env.GMAIL_CLIENT_ID || !env.GMAIL_CLIENT_SECRET || !env.GMAIL_REFRESH_TOKEN) {
+    const clientId = params?.clientId || env.GMAIL_CLIENT_ID;
+    const clientSecret = params?.clientSecret || env.GMAIL_CLIENT_SECRET;
+    const refreshToken = params?.refreshToken || env.GMAIL_REFRESH_TOKEN;
+    if (!clientId || !clientSecret || !refreshToken) {
         return [];
     }
 
-    const oauth2Client = new google.auth.OAuth2(
-        env.GMAIL_CLIENT_ID,
-        env.GMAIL_CLIENT_SECRET,
-    );
-    oauth2Client.setCredentials({ refresh_token: env.GMAIL_REFRESH_TOKEN });
+    const oauth2Client = new google.auth.OAuth2(clientId, clientSecret);
+    oauth2Client.setCredentials({ refresh_token: refreshToken });
 
     const gmail = google.gmail({ version: "v1", auth: oauth2Client });
     const maxResults = Math.min(params?.maxResults ?? 25, 100);
 
-    const list = await gmail.users.messages.list({
-        userId: "me",
-        maxResults,
-        q: params?.query,
-    });
+    const list = await gmail.users.messages.list({ userId: "me", maxResults, q: params?.query });
 
     const ids = list.data.messages?.map((message) => message.id).filter(Boolean) as string[];
     if (!ids.length) {

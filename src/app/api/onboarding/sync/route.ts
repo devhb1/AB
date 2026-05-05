@@ -21,17 +21,22 @@ export async function POST(request: NextRequest) {
 
                 const [slack, github, gmail] = await Promise.all([
                     ingestSlackEvents({
-                        channelIds: body.channelIds ?? (slackConnection.channelIds as string[] | undefined),
-                        limit: body.slackLimit ?? (slackConnection.limit as number | undefined) ?? 30,
+                        channelIds: body.channelIds ?? ((slackConnection as Record<string, unknown>).channelIds as string[] | undefined),
+                        limit: body.slackLimit ?? ((slackConnection as Record<string, unknown>).limit as number | undefined) ?? 30,
+                        token: (slackConnection as Record<string, unknown>).token as string | undefined,
                     }),
                     ingestGithubEvents({
-                        owner: body.owner ?? (githubConnection.owner as string | undefined),
-                        repo: body.repo ?? (githubConnection.repo as string | undefined),
-                        perPage: body.githubPerPage ?? (githubConnection.perPage as number | undefined) ?? 30,
+                        owner: body.owner ?? ((githubConnection as Record<string, unknown>).owner as string | undefined),
+                        repo: body.repo ?? ((githubConnection as Record<string, unknown>).repo as string | undefined),
+                        perPage: body.githubPerPage ?? ((githubConnection as Record<string, unknown>).perPage as number | undefined) ?? 30,
+                        token: (githubConnection as Record<string, unknown>).token as string | undefined,
                     }),
                     ingestGmailEvents({
-                        query: body.gmailQuery ?? (gmailConnection.query as string | undefined),
-                        maxResults: body.gmailMaxResults ?? (gmailConnection.maxResults as number | undefined) ?? 25,
+                        query: body.gmailQuery ?? ((gmailConnection as Record<string, unknown>).query as string | undefined),
+                        maxResults: body.gmailMaxResults ?? ((gmailConnection as Record<string, unknown>).maxResults as number | undefined) ?? 25,
+                        clientId: (gmailConnection as Record<string, unknown>).clientId as string | undefined,
+                        clientSecret: (gmailConnection as Record<string, unknown>).clientSecret as string | undefined,
+                        refreshToken: (gmailConnection as Record<string, unknown>).refreshToken as string | undefined,
                     }),
                 ]);
 

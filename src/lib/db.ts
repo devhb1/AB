@@ -1,5 +1,6 @@
 import { Pool } from "pg";
 import { env } from "@/lib/config";
+import { decryptToken } from "@/lib/crypto";
 
 let pool: Pool | null = null;
 
@@ -259,7 +260,23 @@ export async function listWorkspaceConnections(workspaceId: string): Promise<Wor
 export async function getWorkspaceConnectionMap(workspaceId: string): Promise<Record<string, Record<string, unknown>>> {
     const connections = await listWorkspaceConnections(workspaceId);
     return connections.reduce<Record<string, Record<string, unknown>>>((accumulator, connection) => {
-        accumulator[connection.provider] = connection.config;
+        // Decrypt any encrypted token fields in the config
+        const config = { ...connection.config } as Record<string, unknown>;
+        
+        // Decrypt token fields if they exist
+        const tokenFields = ["token", "refreshToken", "accessToken"];
+        for (const field of tokenFields) {
+            if (config[field] && typeof config[field] === "string") {
+                try {
+                    config[field] = decryptToken(config[field] as string);
+                } catch (err) {
+                    console.warn(`Failed to decrypt ${field} for provider ${connection.provider}:`, err);
+                    // Keep encrypted value if decryption fails
+                }
+            }
+        }
+        
+        accumulator[connection.provider] = config;
         return accumulator;
     }, {});
 }

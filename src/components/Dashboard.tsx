@@ -51,7 +51,8 @@ export function Dashboard() {
     const [workspaceName, setWorkspaceName] = useState("My Workspace");
     const [workspaceId, setWorkspaceId] = useState("");
     const [activeConnectionProvider, setActiveConnectionProvider] = useState<"slack" | "github" | "gmail" | null>(null);
-    const [slackChannels, setSlackChannels] = useState("");
+    const [slackChannelOptions, setSlackChannelOptions] = useState<{ id: string; name: string; is_private: boolean }[]>([]);
+    const [selectedSlackChannels, setSelectedSlackChannels] = useState<string[]>([]);
     const [githubOwner, setGithubOwner] = useState("");
     const [githubRepo, setGithubRepo] = useState("");
     const [gmailQuery, setGmailQuery] = useState("newer_than:30d");
@@ -70,6 +71,34 @@ export function Dashboard() {
     const openConnectionWindow = (provider: "slack" | "github" | "gmail") => {
         setActiveConnectionProvider(provider);
     };
+
+    // Fetch Slack channels when opening Slack connection window
+    useEffect(() => {
+        if (activeConnectionProvider !== "slack") return;
+
+        let mounted = true;
+        (async () => {
+            try {
+                setMessage("🔄 Loading Slack channels...");
+                const resp = await fetch("/api/connectors/slack/channels", { headers: { "x-workspace-id": workspaceId || "" } });
+                type ChannelsResult = { ok: boolean; channels?: { id: string; name: string; is_private: boolean }[]; error?: string };
+                const data = await readJsonResponse<ChannelsResult>(resp);
+                if (resp.ok && data?.channels) {
+                    if (!mounted) return;
+                    setSlackChannelOptions(data.channels);
+                    setMessage("");
+                } else {
+                    setMessage(`❌ ${data.error || "Failed to load Slack channels"}`);
+                }
+            } catch (err) {
+                setMessage(`Error: ${err instanceof Error ? err.message : "Unknown error"}`);
+            }
+        })();
+
+        return () => {
+            mounted = false;
+        };
+    }, [activeConnectionProvider, workspaceId]);
 
     const connectionTitle =
         activeConnectionProvider === "slack"
@@ -237,13 +266,9 @@ export function Dashboard() {
             const config =
                 provider === "slack"
                     ? {
-                        channelIds: slackChannels
-                            .split(",")
-                            .map((c) => c.trim())
-                            .filter(Boolean)
-                            .length > 0
-                            ? slackChannels.split(",").map((c) => c.trim()).filter(Boolean)
-                            : ["demo-general"],
+                        channelIds: selectedSlackChannels.length > 0
+                            ? selectedSlackChannels
+                            : [],
                     }
                     : provider === "github"
                         ? {
@@ -252,27 +277,8 @@ export function Dashboard() {
                         }
                         : { query: gmailQuery.trim() || "newer_than:30d" };
 
-            // First, validate the credentials with the provider
-            setMessage(`🔄 Validating ${provider} credentials...`);
-            const validateResponse = await fetch("/api/connectors/validate", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    provider,
-                    config,
-                }),
-            });
-
-            const validateData = await readJsonResponse<ApiResult>(validateResponse);
-            if (!validateData.ok) {
-                const errorMsg = validateData.error || "Validation failed. Ensure your provider credentials are set in Vercel environment variables.";
-                setMessage(`❌ ${errorMsg}`);
-                return;
-            }
-
-            // Credentials are valid, now store the connection
+            // Store the connection config (channels/repo/query)
+            // Tokens are managed via OAuth flows and stored separately
             const response = await fetch(`/api/workspaces/${encodeURIComponent(workspaceId)}/connections`, {
                 method: "POST",
                 headers: {
@@ -287,11 +293,11 @@ export function Dashboard() {
             });
             const data = await readJsonResponse<ApiResult>(response);
             if (data.ok) {
-                setMessage(`✅ ${validateData.message || provider + " connected"}`);
+                setMessage(`✅ ${provider} configuration saved`);
                 closeConnectionWindow();
                 await loadStats(workspaceId);
             } else {
-                setMessage(`❌ Failed to store connection`);
+                setMessage(`❌ Failed to save configuration`);
             }
         } catch (err) {
             setMessage(`Error: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -504,28 +510,54 @@ export function Dashboard() {
 
                             {activeConnectionProvider === "slack" && (
                                 <div className="space-y-4">
+                                    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] p-4">
+                                        <p className="text-sm text-[var(--muted)] mb-3">
+                                            Click the button below to authorize AHB26 to access your Slack workspace. You&apos;ll be redirected to Slack to approve the connection.
+                                        </p>
+                                        <button
+                                            onClick={() => {
+                                                window.location.href = `/api/oauth/slack/authorize?workspaceId=${encodeURIComponent(workspaceId)}`;
+                                            }}
+                                            className="w-full rounded-lg border border-[var(--primary)] bg-[var(--primary)] px-4 py-3 font-semibold text-[var(--primary-foreground)] hover:shadow-lg mb-2"
+                                        >
+                                            🔗 Connect with Slack OAuth
+                                        </button>
+                                    </div>
                                     <div>
-                                        <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">Slack channel IDs</label>
-                                        <input
-                                            type="text"
-                                            placeholder="C12345,C67890"
-                                            value={slackChannels}
-                                            onChange={(e) => setSlackChannels(e.target.value)}
-                                            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--muted)]"
-                                        />
+                                        <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">Select Slack channels to sync</label>
+                                        <p className="mb-2 text-xs text-[var(--muted)]">After connecting, choose channels to sync. Private channels require the bot to be invited.</p>
+                                        <div className="mb-2">
+                                            <select
+                                                multiple
+                                                value={selectedSlackChannels}
+                                                onChange={(e) => {
+                                                    const opts = Array.from(e.target.selectedOptions).map((o) => o.value);
+                                                    setSelectedSlackChannels(opts);
+                                                }}
+                                                className="w-full h-40 rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-2 py-2 text-[var(--foreground)] placeholder:text-[var(--muted)]"
+                                            >
+                                                {slackChannelOptions.map((ch) => (
+                                                    <option key={ch.id} value={ch.id}>
+                                                        {ch.name} {ch.is_private ? "(private)" : ""} — {ch.id}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
                                     </div>
                                     <div className="flex gap-3">
                                         <button
-                                            onClick={() => void connectProvider("slack")}
+                                            onClick={() => {
+                                                void connectProvider("slack");
+                                            }}
                                             className="flex-1 rounded-lg border border-[var(--primary)] bg-[var(--primary)] px-4 py-3 font-semibold text-[var(--primary-foreground)]"
                                         >
-                                            Connect Slack
+                                            Save Channels
                                         </button>
                                         <button
                                             onClick={closeConnectionWindow}
                                             className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 font-semibold text-[var(--foreground)]"
                                         >
-                                            Cancel
+                                            Close
                                         </button>
                                     </div>
                                 </div>
@@ -533,11 +565,24 @@ export function Dashboard() {
 
                             {activeConnectionProvider === "github" && (
                                 <div className="space-y-4">
+                                    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] p-4">
+                                        <p className="text-sm text-[var(--muted)] mb-3">
+                                            Click the button below to authorize AHB26 to access your GitHub account. You&apos;ll be redirected to GitHub to approve the connection.
+                                        </p>
+                                        <button
+                                            onClick={() => {
+                                                window.location.href = `/api/oauth/github/authorize?workspaceId=${encodeURIComponent(workspaceId)}`;
+                                            }}
+                                            className="w-full rounded-lg border border-[var(--primary)] bg-[var(--primary)] px-4 py-3 font-semibold text-[var(--primary-foreground)] hover:shadow-lg mb-2"
+                                        >
+                                            🔗 Connect with GitHub OAuth
+                                        </button>
+                                    </div>
                                     <div>
-                                        <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">GitHub owner</label>
+                                        <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">GitHub owner/organization</label>
                                         <input
                                             type="text"
-                                            placeholder="owner"
+                                            placeholder="username or org"
                                             value={githubOwner}
                                             onChange={(e) => setGithubOwner(e.target.value)}
                                             className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--muted)]"
@@ -547,10 +592,10 @@ export function Dashboard() {
                                         <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">Repository</label>
                                         <input
                                             type="text"
-                                            placeholder="repo"
+                                            placeholder="repo-name"
                                             value={githubRepo}
                                             onChange={(e) => setGithubRepo(e.target.value)}
-                                            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--muted)]"
+                                            className="mb-3 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--muted)]"
                                         />
                                     </div>
                                     <div className="flex gap-3">
@@ -558,13 +603,13 @@ export function Dashboard() {
                                             onClick={() => void connectProvider("github")}
                                             className="flex-1 rounded-lg border border-[var(--primary)] bg-[var(--primary)] px-4 py-3 font-semibold text-[var(--primary-foreground)]"
                                         >
-                                            Connect GitHub
+                                            Save Repository
                                         </button>
                                         <button
                                             onClick={closeConnectionWindow}
                                             className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 font-semibold text-[var(--foreground)]"
                                         >
-                                            Cancel
+                                            Close
                                         </button>
                                     </div>
                                 </div>
@@ -572,28 +617,42 @@ export function Dashboard() {
 
                             {activeConnectionProvider === "gmail" && (
                                 <div className="space-y-4">
+                                    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] p-4">
+                                        <p className="text-sm text-[var(--muted)] mb-3">
+                                            Click the button below to authorize AHB26 to read your Gmail. You&apos;ll be redirected to Google to approve the connection.
+                                        </p>
+                                        <button
+                                            onClick={() => {
+                                                window.location.href = `/api/oauth/gmail/authorize?workspaceId=${encodeURIComponent(workspaceId)}`;
+                                            }}
+                                            className="w-full rounded-lg border border-[var(--primary)] bg-[var(--primary)] px-4 py-3 font-semibold text-[var(--primary-foreground)] hover:shadow-lg mb-2"
+                                        >
+                                            🔗 Connect with Google OAuth
+                                        </button>
+                                    </div>
                                     <div>
-                                        <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">Gmail query</label>
+                                        <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">Gmail search query</label>
                                         <input
                                             type="text"
                                             placeholder="newer_than:30d"
                                             value={gmailQuery}
                                             onChange={(e) => setGmailQuery(e.target.value)}
-                                            className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--muted)]"
+                                            className="mb-3 w-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--muted)]"
                                         />
+                                        <p className="text-xs text-[var(--muted)]">See Gmail advanced search syntax for query options.</p>
                                     </div>
                                     <div className="flex gap-3">
                                         <button
                                             onClick={() => void connectProvider("gmail")}
                                             className="flex-1 rounded-lg border border-[var(--primary)] bg-[var(--primary)] px-4 py-3 font-semibold text-[var(--primary-foreground)]"
                                         >
-                                            Connect Gmail
+                                            Save Query
                                         </button>
                                         <button
                                             onClick={closeConnectionWindow}
                                             className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-3 font-semibold text-[var(--foreground)]"
                                         >
-                                            Cancel
+                                            Close
                                         </button>
                                     </div>
                                 </div>

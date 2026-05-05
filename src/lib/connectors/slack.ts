@@ -14,8 +14,10 @@ export type SlackEventRecord = {
 export async function ingestSlackEvents(params: {
     channelIds?: string[];
     limit?: number;
+    token?: string;
 }): Promise<SlackEventRecord[]> {
-    if (!env.SLACK_BOT_TOKEN) {
+    const token = params.token || env.SLACK_BOT_TOKEN;
+    if (!token) {
         return [];
     }
 
@@ -23,8 +25,7 @@ export async function ingestSlackEvents(params: {
     if (!channels.length) {
         return [];
     }
-
-    const client = new WebClient(env.SLACK_BOT_TOKEN);
+    const client = new WebClient(token);
     const limit = Math.min(params.limit ?? 30, 100);
     const records: SlackEventRecord[] = [];
 
@@ -61,4 +62,28 @@ export async function ingestSlackEvents(params: {
     }
 
     return records;
+}
+
+export async function listSlackChannels(token?: string): Promise<{ id: string; name: string; is_private: boolean }[]> {
+    const finalToken = token || env.SLACK_BOT_TOKEN;
+    if (!finalToken) return [];
+
+    const client = new WebClient(finalToken);
+    const results: { id: string; name: string; is_private: boolean }[] = [];
+    let cursor: string | undefined = undefined;
+
+    do {
+        const res = await client.conversations.list({ cursor, limit: 200, exclude_archived: true, types: "public_channel,private_channel" });
+        for (const ch of res.channels ?? []) {
+            results.push({ id: ch.id as string, name: ch.name as string, is_private: !!ch.is_private });
+        }
+        const meta = res.response_metadata;
+        if (meta && typeof meta === "object") {
+            cursor = (meta as Record<string, unknown>)["next_cursor"] as string | undefined;
+        } else {
+            cursor = undefined;
+        }
+    } while (cursor);
+
+    return results;
 }
