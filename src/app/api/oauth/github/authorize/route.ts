@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
         const githubAuthUrl = new URL("https://github.com/login/oauth/authorize");
         githubAuthUrl.searchParams.append("client_id", env.GITHUB_CLIENT_ID);
         githubAuthUrl.searchParams.append("scope", "repo,read:user");
-        githubAuthUrl.searchParams.append("redirect_uri", `${env.APP_URL || "http://localhost:3000"}/api/oauth/github/callback`);
+        githubAuthUrl.searchParams.append("redirect_uri", `${env.APP_URL}/api/oauth/github/callback`);
         githubAuthUrl.searchParams.append("state", state);
         githubAuthUrl.searchParams.append("allow_signup", "false");
 

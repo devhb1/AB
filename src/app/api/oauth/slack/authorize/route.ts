@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
         const slackAuthUrl = new URL("https://slack.com/oauth/v2/authorize");
         slackAuthUrl.searchParams.append("client_id", env.SLACK_CLIENT_ID);
         slackAuthUrl.searchParams.append("scope", "channels:read,channels:history,chat:write");
-        slackAuthUrl.searchParams.append("redirect_uri", `${env.APP_URL || "http://localhost:3000"}/api/oauth/slack/callback`);
+        slackAuthUrl.searchParams.append("redirect_uri", `${env.APP_URL}/api/oauth/slack/callback`);
         slackAuthUrl.searchParams.append("state", state);
 
         // Log and optionally return the auth URL for debugging

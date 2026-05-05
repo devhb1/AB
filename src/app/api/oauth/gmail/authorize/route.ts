@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
         const googleAuthUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
         googleAuthUrl.searchParams.append("client_id", env.GMAIL_CLIENT_ID);
         googleAuthUrl.searchParams.append("scope", "https://www.googleapis.com/auth/gmail.readonly");
-        googleAuthUrl.searchParams.append("redirect_uri", `${env.APP_URL || "http://localhost:3000"}/api/oauth/gmail/callback`);
+        googleAuthUrl.searchParams.append("redirect_uri", `${env.APP_URL}/api/oauth/gmail/callback`);
         googleAuthUrl.searchParams.append("response_type", "code");
         googleAuthUrl.searchParams.append("state", state);
         googleAuthUrl.searchParams.append("access_type", "offline");

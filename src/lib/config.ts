@@ -36,11 +36,12 @@ if (!parsed.success) {
     throw new Error(`Invalid environment configuration:\n${lines.join("\n")}`);
 }
 
-// Prefer an explicit APP_URL, otherwise use Vercel-provided domain when available,
-// finally fall back to localhost for local development.
+// Prefer an explicit APP_URL, then a canonical PRIMARY_DOMAIN, and only use
+// the Vercel preview domain as a last resort for local/ephemeral runs.
 const rawEnv = parsed.data;
 const vercelUrl = process.env.VERCEL_URL;
-const resolvedAppUrl = rawEnv.APP_URL ?? (vercelUrl ? `https://${vercelUrl}` : undefined) ?? "http://localhost:3000";
+const canonicalAppUrl = rawEnv.APP_URL?.trim() || rawEnv.PRIMARY_DOMAIN?.trim() || undefined;
+const resolvedAppUrl = canonicalAppUrl ?? (vercelUrl ? `https://${vercelUrl}` : undefined) ?? "http://localhost:3000";
 
 export const env = {
     ...rawEnv,
