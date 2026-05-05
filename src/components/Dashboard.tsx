@@ -212,6 +212,39 @@ export function Dashboard() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user?.id]);
 
+    // Handle OAuth callback query params (slack_connected, github_connected, gmail_connected)
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const workspaceFromParam = params.get("workspace");
+
+        if (workspaceFromParam && !workspaceId) {
+            setWorkspaceId(workspaceFromParam);
+            window.localStorage.setItem(WORKSPACE_KEY, workspaceFromParam);
+        }
+
+        if (params.get("slack_connected") === "true") {
+            setMessage("✅ Slack connected. Refreshing workspace...");
+            if (workspaceFromParam) void loadStats(workspaceFromParam);
+        }
+
+        if (params.get("github_connected") === "true") {
+            setMessage("✅ GitHub connected. Refreshing workspace...");
+            if (workspaceFromParam) void loadStats(workspaceFromParam);
+        }
+
+        if (params.get("gmail_connected") === "true") {
+            setMessage("✅ Gmail connected. Refreshing workspace...");
+            if (workspaceFromParam) void loadStats(workspaceFromParam);
+        }
+
+        // Clean up URL to remove params without reloading
+        if (params.has("slack_connected") || params.has("github_connected") || params.has("gmail_connected") || params.has("error")) {
+            const cleanUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     const createWorkspace = async () => {
         if (!accountId) {
             setMessage("Error: Account is still initializing. Please wait a moment and try again.");
