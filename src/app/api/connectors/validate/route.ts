@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { env } from "@/lib/config";
 import { ingestSlackEvents } from "@/lib/connectors/slack";
 import { ingestGithubEvents } from "@/lib/connectors/github";
 import { ingestGmailEvents } from "@/lib/connectors/gmail";
@@ -14,6 +15,17 @@ export async function POST(request: NextRequest) {
         const input = validateSchema.parse(await request.json());
 
         if (input.provider === "slack") {
+            if (!env.SLACK_BOT_TOKEN) {
+                return NextResponse.json(
+                    {
+                        ok: false,
+                        valid: false,
+                        error: "Slack token not configured. Add SLACK_BOT_TOKEN to Vercel environment variables.",
+                    },
+                    { status: 400 },
+                );
+            }
+
             const config = input.config as { channelIds?: string[] };
             try {
                 // Try to ingest a small sample to test the token
@@ -32,7 +44,7 @@ export async function POST(request: NextRequest) {
                     {
                         ok: false,
                         valid: false,
-                        error: `Slack validation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+                        error: `Slack error: ${error instanceof Error ? error.message : "Unknown error"}. Verify the channel IDs exist and the bot has access.`,
                     },
                     { status: 400 },
                 );
@@ -40,6 +52,17 @@ export async function POST(request: NextRequest) {
         }
 
         if (input.provider === "github") {
+            if (!env.GITHUB_TOKEN) {
+                return NextResponse.json(
+                    {
+                        ok: false,
+                        valid: false,
+                        error: "GitHub token not configured. Add GITHUB_TOKEN to Vercel environment variables.",
+                    },
+                    { status: 400 },
+                );
+            }
+
             const config = input.config as { owner?: string; repo?: string };
             try {
                 // Try to fetch a small sample to test the token
@@ -59,7 +82,7 @@ export async function POST(request: NextRequest) {
                     {
                         ok: false,
                         valid: false,
-                        error: `GitHub validation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+                        error: `GitHub error: ${error instanceof Error ? error.message : "Unknown error"}. Verify the owner and repo exist and the token has access.`,
                     },
                     { status: 400 },
                 );
@@ -67,6 +90,17 @@ export async function POST(request: NextRequest) {
         }
 
         if (input.provider === "gmail") {
+            if (!env.GMAIL_CLIENT_ID || !env.GMAIL_CLIENT_SECRET || !env.GMAIL_REFRESH_TOKEN) {
+                return NextResponse.json(
+                    {
+                        ok: false,
+                        valid: false,
+                        error: "Gmail credentials not configured. Add GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, and GMAIL_REFRESH_TOKEN to Vercel environment variables.",
+                    },
+                    { status: 400 },
+                );
+            }
+
             const config = input.config as { query?: string };
             try {
                 // Try to fetch a small sample to test the token
@@ -85,7 +119,7 @@ export async function POST(request: NextRequest) {
                     {
                         ok: false,
                         valid: false,
-                        error: `Gmail validation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+                        error: `Gmail error: ${error instanceof Error ? error.message : "Unknown error"}. Verify the refresh token is valid.`,
                     },
                     { status: 400 },
                 );
