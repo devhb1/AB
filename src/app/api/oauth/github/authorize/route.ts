@@ -25,6 +25,12 @@ export async function GET(request: NextRequest) {
         githubAuthUrl.searchParams.append("state", state);
         githubAuthUrl.searchParams.append("allow_signup", "false");
 
+        // Log and optionally return the auth URL for debugging
+        console.log("[oauth] GitHub auth URL:", githubAuthUrl.toString());
+        if (url.searchParams.get("debug") === "1") {
+            return NextResponse.json({ ok: true, url: githubAuthUrl.toString() });
+        }
+
         return NextResponse.redirect(githubAuthUrl.toString());
     } catch (error) {
         return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });

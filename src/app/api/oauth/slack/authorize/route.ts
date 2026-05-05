@@ -24,6 +24,12 @@ export async function GET(request: NextRequest) {
         slackAuthUrl.searchParams.append("redirect_uri", `${env.APP_URL || "http://localhost:3000"}/api/oauth/slack/callback`);
         slackAuthUrl.searchParams.append("state", state);
 
+        // Log and optionally return the auth URL for debugging
+        console.log("[oauth] Slack auth URL:", slackAuthUrl.toString());
+        if (url.searchParams.get("debug") === "1") {
+            return NextResponse.json({ ok: true, url: slackAuthUrl.toString() });
+        }
+
         return NextResponse.redirect(slackAuthUrl.toString());
     } catch (error) {
         return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });

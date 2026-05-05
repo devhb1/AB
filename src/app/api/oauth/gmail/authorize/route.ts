@@ -27,6 +27,12 @@ export async function GET(request: NextRequest) {
         googleAuthUrl.searchParams.append("access_type", "offline");
         googleAuthUrl.searchParams.append("prompt", "consent");
 
+        // Log and optionally return the auth URL for debugging
+        console.log("[oauth] Gmail auth URL:", googleAuthUrl.toString());
+        if (url.searchParams.get("debug") === "1") {
+            return NextResponse.json({ ok: true, url: googleAuthUrl.toString() });
+        }
+
         return NextResponse.redirect(googleAuthUrl.toString());
     } catch (error) {
         return NextResponse.json({ ok: false, error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
