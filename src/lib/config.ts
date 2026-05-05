@@ -36,12 +36,31 @@ if (!parsed.success) {
     throw new Error(`Invalid environment configuration:\n${lines.join("\n")}`);
 }
 
-// Prefer an explicit APP_URL, then a canonical PRIMARY_DOMAIN, and only use
-// the Vercel preview domain as a last resort for local/ephemeral runs.
+// Prefer an explicit APP_URL, then a canonical PRIMARY_DOMAIN, and fall back
+// to a known production URL on Vercel or localhost during local development.
 const rawEnv = parsed.data;
-const vercelUrl = process.env.VERCEL_URL;
-const canonicalAppUrl = rawEnv.APP_URL?.trim() || rawEnv.PRIMARY_DOMAIN?.trim() || undefined;
-const resolvedAppUrl = canonicalAppUrl ?? (vercelUrl ? `https://${vercelUrl}` : undefined) ?? "http://localhost:3000";
+const canonicalProductionUrl = "https://ahbyc2026.vercel.app";
+const localDevelopmentUrl = "http://localhost:3000";
+
+function normalizeAppUrl(value?: string): string | undefined {
+    if (!value) {
+        return undefined;
+    }
+
+    const candidate = value.trim().replace(/\/+$/, "");
+
+    try {
+        return new URL(candidate).origin;
+    } catch {
+        return undefined;
+    }
+}
+
+const isLocalDevelopment = rawEnv.NODE_ENV === "development" && !process.env.VERCEL;
+const resolvedAppUrl =
+    normalizeAppUrl(rawEnv.APP_URL) ??
+    normalizeAppUrl(rawEnv.PRIMARY_DOMAIN) ??
+    (isLocalDevelopment ? localDevelopmentUrl : canonicalProductionUrl);
 
 export const env = {
     ...rawEnv,
