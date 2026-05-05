@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
             app_id?: string;
             error?: string;
         };
-        
+
         const tokenData = (await tokenResponse.json()) as SlackOAuthResponse;
 
         if (!tokenData.ok) {
@@ -85,10 +85,10 @@ export async function GET(request: NextRequest) {
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : "Unknown error";
         console.error("Slack OAuth callback error:", errorMsg);
-        
+
         const errorUrl = new URL("/", env.APP_URL || "http://localhost:3000");
         errorUrl.searchParams.append("error", encodeURIComponent(errorMsg));
-        
+
         return NextResponse.redirect(errorUrl.toString());
     }
 }

@@ -262,7 +262,7 @@ export async function getWorkspaceConnectionMap(workspaceId: string): Promise<Re
     return connections.reduce<Record<string, Record<string, unknown>>>((accumulator, connection) => {
         // Decrypt any encrypted token fields in the config
         const config = { ...connection.config } as Record<string, unknown>;
-        
+
         // Decrypt token fields if they exist
         const tokenFields = ["token", "refreshToken", "accessToken"];
         for (const field of tokenFields) {
@@ -275,7 +275,7 @@ export async function getWorkspaceConnectionMap(workspaceId: string): Promise<Re
                 }
             }
         }
-        
+
         accumulator[connection.provider] = config;
         return accumulator;
     }, {});
