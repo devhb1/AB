@@ -36,7 +36,16 @@ if (!parsed.success) {
     throw new Error(`Invalid environment configuration:\n${lines.join("\n")}`);
 }
 
-export const env = parsed.data;
+// Prefer an explicit APP_URL, otherwise use Vercel-provided domain when available,
+// finally fall back to localhost for local development.
+const rawEnv = parsed.data;
+const vercelUrl = process.env.VERCEL_URL;
+const resolvedAppUrl = rawEnv.APP_URL ?? (vercelUrl ? `https://${vercelUrl}` : undefined) ?? "http://localhost:3000";
+
+export const env = {
+    ...rawEnv,
+    APP_URL: resolvedAppUrl,
+};
 
 export const defaultSlackChannels = env.SLACK_CHANNEL_IDS
     ? env.SLACK_CHANNEL_IDS.split(",").map((item) => item.trim()).filter(Boolean)
